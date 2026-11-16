@@ -27,6 +27,15 @@ $oldData = [
 $hasOld = session('_ci_old_input') !== null;
 ?>
 
+<div class="back-link-row">
+    <a class="back-link" href="<?= site_url('asesmen') ?>">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M19.5 12h-14M10.5 6.5L5 12l5.5 5.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Kembali ke daftar draft
+    </a>
+</div>
+
 <div class="page-head asesmen-head">
     <div>
         <span class="page-head__eyebrow">
@@ -36,10 +45,10 @@ $hasOld = session('_ci_old_input') !== null;
             </svg>
             Asesmen pembelajaran
         </span>
-        <h1>Susun asesmen</h1>
+        <h1><?= $isNew ? 'Draft asesmen baru' : 'Edit draft asesmen' ?></h1>
         <p>
-            Tulis soal Anda sendiri seperti di Google Forms atau Quizizz. Hasil akhirnya
-            berupa satu berkas PDF berisi soal dan halaman kunci jawaban.
+            Susun identitas dan soal asesmen Anda. Perubahan hanya tersimpan di browser ini
+            setelah tombol <strong>Simpan</strong> ditekan.
         </p>
     </div>
 
@@ -52,13 +61,33 @@ $hasOld = session('_ci_old_input') !== null;
             Pratinjau
         </button>
 
-        <button type="submit" form="asesmen-form" class="btn btn--primary" data-download>
+        <button type="button" class="btn btn--primary" data-save>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M7.2 4.5h8.1L19 8.2v11.3a1.8 1.8 0 0 1-1.8 1.8H7a1.8 1.8 0 0 1-1.8-1.8V6.3A1.8 1.8 0 0 1 7 4.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                <path d="M8.5 4.8v5h7v-5M8.5 15.5h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            Simpan
+        </button>
+
+        <button type="submit" form="asesmen-form" class="btn btn--ghost" data-download>
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M12 4.5v10M7.5 10L12 14.5 16.5 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M4.5 16v2A2.5 2.5 0 0 0 7 20.5h10a2.5 2.5 0 0 0 2.5-2.5v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
             </svg>
             <span data-download-label>Unduh PDF</span>
         </button>
+    </div>
+</div>
+
+<div class="alert alert--error" role="alert" data-missing hidden>
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 8v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="12" cy="16.4" r="1" fill="currentColor"/>
+    </svg>
+    <div>
+        <p><strong>Draft tidak ditemukan.</strong> Draft ini mungkin sudah dihapus dari browser ini.</p>
+        <p><a href="<?= site_url('asesmen') ?>">Kembali ke daftar draft</a></p>
     </div>
 </div>
 
@@ -82,7 +111,16 @@ $hasOld = session('_ci_old_input') !== null;
 
 <div class="builder-layout">
     <div class="builder-main">
-        <form id="asesmen-form" action="<?= site_url('asesmen/pdf') ?>" method="post" data-asesmen-form>
+        <form
+            id="asesmen-form"
+            action="<?= site_url('asesmen/pdf') ?>"
+            method="post"
+            data-asesmen-form
+            data-draft-id="<?= esc($draftId, 'attr') ?>"
+            data-is-new="<?= $isNew ? '1' : '0' ?>"
+            data-list-url="<?= esc(site_url('asesmen'), 'attr') ?>"
+        >
+            <input type="hidden" name="draft_id" value="<?= esc($draftId, 'attr') ?>" data-draft-field>
 
             <section class="panel">
                 <div class="panel__head">
@@ -225,12 +263,19 @@ $hasOld = session('_ci_old_input') !== null;
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M4.5 12a7.5 7.5 0 1 0 2.3-5.4M4.5 4.5v4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    Bersihkan draft
+                    Bersihkan isian
                 </button>
 
                 <div class="builder-actions__right">
                     <button type="button" class="btn btn--ghost" data-preview>Pratinjau</button>
-                    <button type="submit" class="btn btn--primary" data-download>
+                    <button type="button" class="btn btn--primary" data-save>
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M7.2 4.5h8.1L19 8.2v11.3a1.8 1.8 0 0 1-1.8 1.8H7a1.8 1.8 0 0 1-1.8-1.8V6.3A1.8 1.8 0 0 1 7 4.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                            <path d="M8.5 4.8v5h7v-5M8.5 15.5h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                        Simpan
+                    </button>
+                    <button type="submit" class="btn btn--ghost" data-download>
                         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                             <path d="M12 4.5v10M7.5 10L12 14.5 16.5 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                             <path d="M4.5 16v2A2.5 2.5 0 0 0 7 20.5h10a2.5 2.5 0 0 0 2.5-2.5v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -264,7 +309,7 @@ $hasOld = session('_ci_old_input') !== null;
                 <li><span>Isian singkat</span><strong data-summary-isian>0</strong></li>
             </ul>
 
-            <p class="summary-save" data-save-status>Draft tersimpan otomatis di browser ini.</p>
+            <p class="summary-save" data-save-status>Klik Simpan untuk menyimpan draft ini di browser Anda.</p>
         </section>
 
         <section class="tip-card">
@@ -301,7 +346,7 @@ $hasOld = session('_ci_old_input') !== null;
             <span class="q-num" data-q-number>1</span>
             <div class="q-card__meta">
                 <span class="q-type-chip" data-type-label>Pilihan ganda</span>
-                <span class="q-card__hint">Soal</span>
+                <span class="q-card__hint" data-card-hint>Soal</span>
             </div>
             <div class="q-tools">
                 <button type="button" class="q-tool" data-move-up aria-label="Geser soal ke atas" title="Geser ke atas">
@@ -462,7 +507,8 @@ $hasOld = session('_ci_old_input') !== null;
     (function () {
         'use strict';
 
-        var STORAGE_KEY = 'sasmita.asesmen.draft.v1';
+        var DRAFT_KEY = 'sasmita.asesmen.drafts.v2';
+        var LEGACY_KEY = 'sasmita.asesmen.draft.v1';
         var MAX_QUESTIONS = 100;
         var MIN_OPTIONS = 2;
         var MAX_OPTIONS = 6;
@@ -485,8 +531,13 @@ $hasOld = session('_ci_old_input') !== null;
         var saveStatus = document.querySelector('[data-save-status]');
         var previewOverlay = document.querySelector('[data-preview-overlay]');
         var previewBody = document.querySelector('[data-preview-body]');
+        var draftField = document.querySelector('[data-draft-field]');
         var defaultTeacher = window.__ASESMEN_TEACHER__ || '';
-        var saveTimer = null;
+        var DRAFT_ID = form.getAttribute('data-draft-id') || '';
+        var IS_NEW = form.getAttribute('data-is-new') === '1';
+        var LIST_URL = form.getAttribute('data-list-url') || '';
+        var dirty = false;
+        var missingDraft = false;
         var resetDownloadTimer = null;
 
         function each(selector, scope, callback) {
@@ -701,6 +752,191 @@ $hasOld = session('_ci_old_input') !== null;
             };
         }
 
+        // ---- Penyimpanan draft asesmen (localStorage) ----
+
+        function makeDraftId() {
+            return 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        }
+
+        function loadDrafts() {
+            var stored = null;
+
+            try {
+                stored = JSON.parse(localStorage.getItem(DRAFT_KEY) || '[]');
+            } catch (error) {
+                stored = null;
+            }
+
+            if (! Array.isArray(stored)) {
+                return [];
+            }
+
+            return stored.filter(function (item) {
+                return item && typeof item === 'object' && String(item.id || '') !== '';
+            });
+        }
+
+        function findDraft(id) {
+            if (! id) {
+                return null;
+            }
+
+            var drafts = loadDrafts();
+
+            for (var i = 0; i < drafts.length; i++) {
+                if (String(drafts[i].id) === String(id)) {
+                    return drafts[i];
+                }
+            }
+
+            return null;
+        }
+
+        function persistDrafts(drafts) {
+            try {
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts));
+                return true;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function questionHasContent(question) {
+            if (! question) {
+                return false;
+            }
+
+            if (String(question.text || '').trim() !== '') {
+                return true;
+            }
+
+            if (String(question.answer || '').trim() !== '') {
+                return true;
+            }
+
+            if (String(question.rubric || '').trim() !== '') {
+                return true;
+            }
+
+            return (Array.isArray(question.options) ? question.options : []).some(function (option) {
+                return String(option || '').trim() !== '';
+            });
+        }
+
+        function collectQuestions() {
+            return getCards().map(readCard).filter(questionHasContent);
+        }
+
+        function collectDraft() {
+            return {
+                title: field('title').value,
+                subject: field('subject').value,
+                class: field('class').value,
+                teacher: field('teacher').value,
+                time: field('time').value,
+                instructions: field('instructions').value,
+                questions: collectQuestions()
+            };
+        }
+
+        function timeLabel(timestamp) {
+            try {
+                return new Date(timestamp).toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (error) {
+                return '';
+            }
+        }
+
+        function saveCurrentDraft() {
+            var drafts = loadDrafts();
+            var data = collectDraft();
+            var now = Date.now();
+            var index = -1;
+
+            for (var i = 0; i < drafts.length; i++) {
+                if (String(drafts[i].id) === String(DRAFT_ID)) {
+                    index = i;
+                    break;
+                }
+            }
+
+            if (index === -1) {
+                DRAFT_ID = DRAFT_ID || makeDraftId();
+                drafts.unshift({
+                    id: DRAFT_ID,
+                    title: data.title,
+                    subject: data.subject,
+                    class: data['class'],
+                    teacher: data.teacher,
+                    time: data.time,
+                    instructions: data.instructions,
+                    questions: data.questions,
+                    createdAt: now,
+                    updatedAt: now
+                });
+            } else {
+                drafts[index].title = data.title;
+                drafts[index].subject = data.subject;
+                drafts[index]['class'] = data['class'];
+                drafts[index].teacher = data.teacher;
+                drafts[index].time = data.time;
+                drafts[index].instructions = data.instructions;
+                drafts[index].questions = data.questions;
+                drafts[index].updatedAt = now;
+            }
+
+            if (! persistDrafts(drafts)) {
+                setSaveStatus('Draft gagal disimpan. Penyimpanan browser mungkin penuh atau diblokir.');
+                return;
+            }
+
+            if (draftField) {
+                draftField.value = DRAFT_ID;
+            }
+
+            if (IS_NEW) {
+                IS_NEW = false;
+                form.setAttribute('data-is-new', '0');
+
+                try {
+                    window.history.replaceState(null, '', LIST_URL + '/' + encodeURIComponent(DRAFT_ID));
+                } catch (error) {
+                    // Riwayat browser bisa dibatasi; abaikan.
+                }
+            }
+
+            dirty = false;
+            setSaveStatus('Draft tersimpan pukul ' + timeLabel(now) + '.');
+        }
+
+        function markDirty() {
+            dirty = true;
+            setSaveStatus('Ada perubahan yang belum disimpan. Klik Simpan.');
+        }
+
+        function showMissingDraft() {
+            var notice = document.querySelector('[data-missing]');
+
+            missingDraft = true;
+
+            if (notice) {
+                notice.hidden = false;
+            }
+
+            each('[data-save]', document, function (button) {
+                button.disabled = true;
+            });
+
+            each('[data-download]', document, function (button) {
+                button.disabled = true;
+            });
+
+            setSaveStatus('Draft tidak ditemukan. Kembali ke daftar draft untuk memilih draft lain.');
+        }
+
         function reindex() {
             var cards = getCards();
 
@@ -739,7 +975,6 @@ $hasOld = session('_ci_old_input') !== null;
             }
 
             updateSummary();
-            scheduleSave();
         }
 
         function updateSummary() {
@@ -779,55 +1014,6 @@ $hasOld = session('_ci_old_input') !== null;
             if (saveStatus) {
                 saveStatus.textContent = text;
             }
-        }
-
-        function scheduleSave() {
-            setSaveStatus('Menyimpan draft…');
-
-            if (saveTimer) {
-                clearTimeout(saveTimer);
-            }
-
-            saveTimer = setTimeout(saveDraft, 450);
-        }
-
-        function saveDraft() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(readAll()));
-                setSaveStatus('Draft tersimpan otomatis di browser ini.');
-            } catch (error) {
-                setSaveStatus('Draft tidak dapat disimpan di browser ini.');
-            }
-        }
-
-        function hasContent(data) {
-            if (! data) {
-                return false;
-            }
-
-            var metaKeys = ['title', 'subject', 'class', 'time', 'instructions'];
-
-            for (var i = 0; i < metaKeys.length; i++) {
-                if (String(data[metaKeys[i]] || '').trim() !== '') {
-                    return true;
-                }
-            }
-
-            return (Array.isArray(data.questions) ? data.questions : []).some(function (question) {
-                if (String(question.text || '').trim() !== '') {
-                    return true;
-                }
-                if (String(question.answer || '').trim() !== '') {
-                    return true;
-                }
-                if (String(question.rubric || '').trim() !== '') {
-                    return true;
-                }
-
-                return (Array.isArray(question.options) ? question.options : []).some(function (option) {
-                    return String(option || '').trim() !== '';
-                });
-            });
         }
 
         function fillForm(data) {
@@ -870,6 +1056,7 @@ $hasOld = session('_ci_old_input') !== null;
             }
 
             card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            markDirty();
 
             setTimeout(function () {
                 var input = card.querySelector('[data-field="text"]');
@@ -880,6 +1067,10 @@ $hasOld = session('_ci_old_input') !== null;
         }
 
         function startDownload() {
+            if (missingDraft) {
+                return;
+            }
+
             each('[data-download]', document, function (button) {
                 button.disabled = true;
                 button.classList.add('is-loading');
@@ -899,6 +1090,10 @@ $hasOld = session('_ci_old_input') !== null;
         }
 
         function resetDownloadButtons() {
+            if (missingDraft) {
+                return;
+            }
+
             each('[data-download]', document, function (button) {
                 button.disabled = false;
                 button.classList.remove('is-loading');
@@ -1095,6 +1290,7 @@ $hasOld = session('_ci_old_input') !== null;
                 if (row && rows.length > MIN_OPTIONS) {
                     row.remove();
                     reindex();
+                    markDirty();
                 }
 
                 return;
@@ -1109,6 +1305,7 @@ $hasOld = session('_ci_old_input') !== null;
 
                 optionList.appendChild(makeOptionRow('', false));
                 reindex();
+                markDirty();
 
                 var inputs = optionList.querySelectorAll('[data-option] input[type="text"]');
                 if (inputs.length) {
@@ -1125,6 +1322,7 @@ $hasOld = session('_ci_old_input') !== null;
 
                 card.remove();
                 reindex();
+                markDirty();
                 return;
             }
 
@@ -1137,6 +1335,7 @@ $hasOld = session('_ci_old_input') !== null;
                 var clone = createCard(readCard(card));
                 card.parentNode.insertBefore(clone, card.nextSibling);
                 reindex();
+                markDirty();
 
                 clone.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
@@ -1148,6 +1347,7 @@ $hasOld = session('_ci_old_input') !== null;
                 if (previous && previous.matches('[data-question]')) {
                     list.insertBefore(card, previous);
                     reindex();
+                    markDirty();
                 }
 
                 return;
@@ -1159,6 +1359,7 @@ $hasOld = session('_ci_old_input') !== null;
                 if (next && next.matches('[data-question]')) {
                     list.insertBefore(next, card);
                     reindex();
+                    markDirty();
                 }
             }
         });
@@ -1168,6 +1369,7 @@ $hasOld = session('_ci_old_input') !== null;
                 var card = event.target.closest('[data-question]');
                 setType(card, event.target.value);
                 reindex();
+                markDirty();
             }
         });
 
@@ -1176,10 +1378,16 @@ $hasOld = session('_ci_old_input') !== null;
                 updateSummary();
             }
 
-            scheduleSave();
+            markDirty();
         });
 
-        form.addEventListener('submit', function () {
+        form.addEventListener('submit', function (event) {
+            if (missingDraft) {
+                event.preventDefault();
+                return;
+            }
+
+            dirty = false;
             startDownload();
         });
 
@@ -1191,6 +1399,10 @@ $hasOld = session('_ci_old_input') !== null;
 
         each('[data-preview]', document, function (button) {
             button.addEventListener('click', openPreview);
+        });
+
+        each('[data-save]', document, function (button) {
+            button.addEventListener('click', saveCurrentDraft);
         });
 
         if (previewOverlay) {
@@ -1229,14 +1441,8 @@ $hasOld = session('_ci_old_input') !== null;
         var resetButton = document.querySelector('[data-reset]');
         if (resetButton) {
             resetButton.addEventListener('click', function () {
-                if (! window.confirm('Bersihkan semua isian dan mulai dari awal?')) {
+                if (! window.confirm('Bersihkan semua isian pada halaman ini? Draft yang sudah disimpan baru berubah setelah Anda menekan Simpan.')) {
                     return;
-                }
-
-                try {
-                    localStorage.removeItem(STORAGE_KEY);
-                } catch (error) {
-                    // localStorage bisa diblokir; abaikan.
                 }
 
                 ['title', 'subject', 'class', 'time', 'instructions'].forEach(function (name) {
@@ -1253,10 +1459,12 @@ $hasOld = session('_ci_old_input') !== null;
                 list.innerHTML = '';
                 list.appendChild(createCard());
                 reindex();
+                markDirty();
+                setSaveStatus('Isian dibersihkan. Klik Simpan untuk menyimpan perubahan.');
             });
         }
 
-        // ---- Inisialisasi: pulihkan isian sebelumnya atau draft browser ----
+        // ---- Inisialisasi: pulihkan isian sebelumnya atau draft tersimpan ----
 
         var oldData = window.__ASESMEN_OLD__ || null;
         var restored = false;
@@ -1264,19 +1472,20 @@ $hasOld = session('_ci_old_input') !== null;
         if (window.__ASESMEN_HAS_OLD__ && oldData) {
             fillForm(oldData);
             restored = true;
+            dirty = true;
+            setSaveStatus('Isian terakhir dipulihkan. Periksa kembali lalu klik Simpan.');
         } else {
-            var stored = null;
+            var storedDraft = findDraft(DRAFT_ID);
 
-            try {
-                stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-            } catch (error) {
-                stored = null;
-            }
-
-            if (stored && hasContent(stored)) {
-                fillForm(stored);
+            if (storedDraft) {
+                fillForm(storedDraft);
                 restored = true;
-                setSaveStatus('Draft sebelumnya dipulihkan dari browser ini.');
+                setSaveStatus('Draft tersimpan di browser ini.');
+            } else if (! IS_NEW) {
+                showMissingDraft();
+                list.appendChild(createCard());
+                reindex();
+                restored = true;
             }
         }
 
@@ -1284,6 +1493,15 @@ $hasOld = session('_ci_old_input') !== null;
             list.appendChild(createCard());
             reindex();
         }
+
+        window.addEventListener('beforeunload', function (event) {
+            if (! dirty) {
+                return;
+            }
+
+            event.preventDefault();
+            event.returnValue = '';
+        });
 
         window.addEventListener('pageshow', function () {
             resetDownloadButtons();

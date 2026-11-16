@@ -19,6 +19,8 @@ $routes->get('rps/(:segment)/sumber', 'Rps::downloadSource/$1');
 $routes->post('rps/(:segment)/hapus', 'Rps::delete/$1');
 $routes->get('rps/(:segment)', 'Rps::show/$1');
 
-// Asesmen: form builder + unduh PDF
+// Asesmen: daftar draft, builder, dan unduh PDF
 $routes->get('asesmen', 'Asesmen::index');
+$routes->get('asesmen/baru', 'Asesmen::newDraft');
 $routes->post('asesmen/pdf', 'Asesmen::pdf');
+$routes->get('asesmen/(:segment)', 'Asesmen::edit/$1');

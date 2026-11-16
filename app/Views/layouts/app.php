@@ -57,14 +57,6 @@ $initial = strtoupper(substr($user['name'] ?? 'G', 0, 1));
 
             <a class="side-link" href="#" data-coming-soon>
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M4.5 6.5A2 2 0 0 1 6.5 4.5h11a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-11z" stroke="currentColor" stroke-width="1.7"/>
-                    <path d="M8 9.5h8M8 13h5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-                </svg>
-                <span>Bank Materi</span>
-            </a>
-
-            <a class="side-link" href="#" data-coming-soon>
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M4.5 19.5V13M9.8 19.5V7.5M15.2 19.5v-4.5M20.5 19.5V4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                 </svg>
                 <span>Analitik</span>

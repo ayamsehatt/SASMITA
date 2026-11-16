@@ -22,7 +22,7 @@ class Asesmen extends BaseController
     ];
 
     /**
-     * Form builder asesmen. Tidak ada data contoh: guru mulai dari kartu kosong.
+     * Daftar draft asesmen. Kartu draft disusun di sisi browser dari localStorage.
      */
     public function index()
     {
@@ -32,11 +32,60 @@ class Asesmen extends BaseController
 
         $user = session('user') ?? [];
 
-        return view('asesmen/create', [
-            'title'       => 'Asesmen · SASMITA',
+        return view('asesmen/index', [
+            'title'       => 'Draft Asesmen · SASMITA',
             'active'      => 'asesmen',
             'crumb'       => 'Asesmen',
             'teacherName' => (string) ($user['name'] ?? ''),
+            'missing'     => $this->request->getGet('missing') === '1',
+        ]);
+    }
+
+    /**
+     * Builder untuk draft asesmen baru.
+     */
+    public function newDraft()
+    {
+        if ($redirect = $this->guard()) {
+            return $redirect;
+        }
+
+        $user = session('user') ?? [];
+
+        return view('asesmen/form', [
+            'title'       => 'Draft Baru · SASMITA',
+            'active'      => 'asesmen',
+            'crumb'       => 'Asesmen / Draft baru',
+            'teacherName' => (string) ($user['name'] ?? ''),
+            'draftId'     => '',
+            'isNew'       => true,
+        ]);
+    }
+
+    /**
+     * Builder untuk membuka dan mengedit draft asesmen yang sudah ada.
+     */
+    public function edit($id = null)
+    {
+        if ($redirect = $this->guard()) {
+            return $redirect;
+        }
+
+        $id = trim((string) $id);
+
+        if ($id === '' || ! preg_match('/^[A-Za-z0-9_-]{1,64}$/', $id)) {
+            return redirect()->to(site_url('asesmen?missing=1'));
+        }
+
+        $user = session('user') ?? [];
+
+        return view('asesmen/form', [
+            'title'       => 'Edit Draft · SASMITA',
+            'active'      => 'asesmen',
+            'crumb'       => 'Asesmen / Edit draft',
+            'teacherName' => (string) ($user['name'] ?? ''),
+            'draftId'     => $id,
+            'isNew'       => false,
         ]);
     }
 
@@ -53,8 +102,13 @@ class Asesmen extends BaseController
         $errors = $this->validateAsesmen($data);
 
         if ($errors !== []) {
+            $draftId = trim((string) $this->request->getPost('draft_id'));
+            $target  = preg_match('/^[A-Za-z0-9_-]{1,64}$/', $draftId)
+                ? 'asesmen/' . $draftId
+                : 'asesmen/baru';
+
             return redirect()
-                ->to(site_url('asesmen'))
+                ->to(site_url($target))
                 ->withInput()
                 ->with('errors', $errors);
         }

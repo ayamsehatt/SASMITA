@@ -639,6 +639,224 @@
 }
 
 /* --------------------------------------------------------------------------
+   Daftar draft asesmen
+   -------------------------------------------------------------------------- */
+
+.draft-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 14px 18px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+}
+
+.draft-toolbar[hidden] {
+    display: none;
+}
+
+.draft-toolbar__info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+.draft-toolbar__info strong {
+    color: var(--ink);
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.draft-loading {
+    margin: 0;
+    padding: 22px;
+    border: 1px dashed #e2d6f7;
+    border-radius: var(--radius-lg);
+    color: var(--muted);
+    font-size: 0.84rem;
+    text-align: center;
+}
+
+.draft-loading[hidden] {
+    display: none;
+}
+
+.draft-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.draft-grid[hidden] {
+    display: none;
+}
+
+.draft-card {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    padding: 20px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.draft-card:hover {
+    transform: translateY(-3px);
+    border-color: #ddcafb;
+    box-shadow: var(--shadow-lg);
+}
+
+.draft-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.draft-card__badge {
+    flex: none;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: #f3ecff;
+    color: var(--violet-700);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.draft-card__date {
+    overflow: hidden;
+    color: var(--muted-2);
+    font-size: 0.68rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.draft-card h3 {
+    margin: 0;
+    font-size: 1.02rem;
+    font-weight: 800;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+}
+
+.draft-card h3 a {
+    color: var(--ink);
+}
+
+.draft-card h3 a:hover {
+    color: var(--violet-700);
+    text-decoration: none;
+}
+
+.draft-card__meta {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.draft-card__meta.is-empty {
+    color: var(--muted-2);
+    font-style: italic;
+}
+
+.draft-card__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.draft-stat {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    max-width: 100%;
+    padding: 5px 10px;
+    border: 1px solid #f0eafb;
+    border-radius: 8px;
+    background: #fbf9ff;
+    color: var(--ink-soft);
+    font-size: 0.71rem;
+    font-weight: 600;
+}
+
+.draft-stat strong {
+    color: var(--violet-700);
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.draft-stat span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.draft-card__preview {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 0.8rem;
+    line-height: 1.55;
+}
+
+.draft-card__preview.is-empty {
+    color: var(--muted-2);
+    font-style: italic;
+}
+
+.draft-card__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid #f4effd;
+}
+
+.draft-card__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.draft-action {
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink-soft);
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.draft-action:hover {
+    border-color: #cdbaf8;
+    background: #faf6ff;
+    color: var(--violet-700);
+}
+
+/* --------------------------------------------------------------------------
    Pratinjau (modal)
    -------------------------------------------------------------------------- */
 
@@ -992,6 +1210,12 @@ body.preview-open {
 
     .summary-card {
         grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 900px) {
+    .draft-grid {
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 
