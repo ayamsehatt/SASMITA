@@ -36,7 +36,7 @@ $rememberedEmail = $rememberedEmail ?? '';
 
         <div class="brand-panel__inner">
             <a class="brand-mark" href="<?= site_url('/') ?>">
-                <img src="<?= base_url('assets/img/logo-sasmita.svg') ?>" alt="">
+                <img src="<?= base_url('assets/img/logo_samita.png') ?>" alt="Logo SASMITA">
                 <span class="brand-mark__text">
                     <span class="brand-mark__name">SASMITA</span>
                     <span class="brand-mark__sub">Asisten Guru Berbasis AI</span>
@@ -94,7 +94,7 @@ $rememberedEmail = $rememberedEmail ?? '';
     <main class="form-panel">
 
         <a class="mobile-brand" href="<?= site_url('/') ?>">
-            <img src="<?= base_url('assets/img/logo-sasmita.svg') ?>" alt="">
+            <img src="<?= base_url('assets/img/logo_samita.png') ?>" alt="Logo SASMITA">
             <span>
                 <span class="mobile-brand__name">SASMITA</span>
                 <span class="mobile-brand__sub">Asisten Guru Berbasis AI</span>

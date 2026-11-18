@@ -29,7 +29,7 @@ $initial = strtoupper(substr($user['name'] ?? 'G', 0, 1));
 
     <aside class="app-sidebar" data-sidebar>
         <a class="side-brand" href="<?= site_url('rps') ?>">
-            <img src="<?= base_url('assets/img/logo-sasmita.svg') ?>" alt="">
+            <img src="<?= base_url('assets/img/logo_samita.png') ?>" alt="Logo SASMITA">
             <span>
                 <span class="side-brand__name">SASMITA</span>
                 <span class="side-brand__sub">Asisten Guru Berbasis AI</span>
@@ -74,7 +74,7 @@ $initial = strtoupper(substr($user['name'] ?? 'G', 0, 1));
         </nav>
 
         <div class="side-user">
-            <span class="side-user__avatar" aria-hidden="true"><?= esc($initial) ?></span>
+            <img class="side-user__avatar" src="<?= base_url('assets/img/foto_guru.jpeg') ?>" alt="Foto profil guru">
             <span class="side-user__meta">
                 <strong><?= esc($user['name']) ?></strong>
                 <span><?= esc($user['role']) ?></span>
@@ -105,7 +105,7 @@ $initial = strtoupper(substr($user['name'] ?? 'G', 0, 1));
 
             <div class="topbar-right">
                 <span class="demo-pill"><span class="dot"></span> Mode demo</span>
-                <span class="topbar-avatar" aria-hidden="true"><?= esc($initial) ?></span>
+                <img class="topbar-avatar" src="<?= base_url('assets/img/foto_guru.jpeg') ?>" alt="Foto profil guru">
             </div>
         </header>
 

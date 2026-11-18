@@ -24,7 +24,7 @@ $initial = strtoupper(substr($user['name'] ?? 'S', 0, 1));
 <div class="form-panel" style="min-height:100vh;min-height:100dvh;justify-content:center">
 
     <a class="mobile-brand" href="<?= site_url('dashboard') ?>" style="display:flex;max-width:760px">
-        <img src="<?= base_url('assets/img/logo-sasmita.svg') ?>" alt="">
+        <img src="<?= base_url('assets/img/logo_samita.png') ?>" alt="Logo SASMITA">
         <span>
             <span class="mobile-brand__name">SASMITA</span>
             <span class="mobile-brand__sub">Asisten Guru Berbasis AI</span>
@@ -44,7 +44,7 @@ $initial = strtoupper(substr($user['name'] ?? 'S', 0, 1));
 
         <header class="dash__head">
             <div class="dash__user">
-                <span class="dash__avatar" aria-hidden="true"><?= esc($initial) ?></span>
+                <img class="dash__avatar" src="<?= base_url('assets/img/foto_guru.jpeg') ?>" alt="Foto profil guru">
                 <div>
                     <strong><?= esc($user['name']) ?></strong>
                     <span><?= esc($user['role']) ?> · <?= esc($user['email']) ?></span>

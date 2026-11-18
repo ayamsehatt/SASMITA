@@ -31,7 +31,7 @@
 
         <div class="card__body">
             <div class="profile-hero">
-                <span class="profile-hero__avatar" aria-hidden="true" data-profile-avatar><?= esc($initial) ?></span>
+                <img class="profile-hero__avatar" src="<?= base_url('assets/img/foto_guru.jpeg') ?>" alt="Foto profil guru">
                 <div class="profile-hero__meta">
                     <strong data-profile-preview><?= esc($nama) ?></strong>
                     <span><?= esc($role !== '' ? $role : 'Guru') ?> · Akun aktif</span>
@@ -134,24 +134,15 @@
     (function () {
         var input = document.querySelector('[data-profile-input]');
         var preview = document.querySelector('[data-profile-preview]');
-        var avatar = document.querySelector('[data-profile-avatar]');
 
         if (!input) {
             return;
-        }
-
-        function firstChar(value) {
-            var text = (value || '').trim();
-            return text ? text.charAt(0).toUpperCase() : 'G';
         }
 
         input.addEventListener('input', function () {
             var value = input.value || '';
             if (preview) {
                 preview.textContent = value.trim() || 'Guru';
-            }
-            if (avatar) {
-                avatar.textContent = firstChar(value);
             }
         });
     })();
