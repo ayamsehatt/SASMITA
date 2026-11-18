@@ -551,10 +551,210 @@
     margin-bottom: 0;
 }
 
+/* Halaman input terpisah & kartu aksi ------------------------------------- */
+
+.an-section-head {
+    margin-bottom: 14px;
+}
+
+.an-section-head h2 {
+    margin: 0 0 4px;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.an-section-head p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+    line-height: 1.6;
+}
+
+.an-input-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.an-action-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 16px;
+    padding: 22px 22px 20px;
+    color: var(--ink);
+    text-decoration: none;
+    border: 1px solid var(--line);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.an-action-card:hover {
+    transform: translateY(-3px);
+    border-color: #d9c7ff;
+    box-shadow: 0 18px 36px -26px rgba(77, 29, 149, 0.45);
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.an-action-card:focus-visible {
+    outline: none;
+    border-color: #a97bff;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.16), 0 18px 36px -26px rgba(77, 29, 149, 0.45);
+}
+
+.an-action-card__icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    color: #fff;
+}
+
+.an-action-card__icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.an-action-card--attendance .an-action-card__icon {
+    background: linear-gradient(135deg, #0f7b4d, #2f9e6a);
+    box-shadow: 0 12px 22px -14px rgba(15, 123, 77, 0.7);
+}
+
+.an-action-card--nilai .an-action-card__icon {
+    background: linear-gradient(135deg, #6d28d9, #8b5cf6);
+    box-shadow: 0 12px 22px -14px rgba(109, 40, 217, 0.7);
+}
+
+.an-action-card__body {
+    min-width: 0;
+}
+
+.an-action-card__eyebrow {
+    display: inline-block;
+    margin-bottom: 4px;
+    color: var(--muted-2);
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.an-action-card__body h3 {
+    margin: 0 0 6px;
+    font-size: 1.12rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.an-action-card__body p {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    line-height: 1.6;
+}
+
+.an-action-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.an-action-card__meta li {
+    padding: 5px 10px;
+    border: 1px solid #eee6fa;
+    border-radius: 999px;
+    background: #fbf9ff;
+    color: var(--ink-soft);
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.an-action-card__arrow {
+    display: grid;
+    place-items: center;
+    align-self: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    color: var(--muted-2);
+    background: #f8f4ff;
+    transition: color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+}
+
+.an-action-card__arrow svg {
+    width: 18px;
+    height: 18px;
+}
+
+.an-action-card:hover .an-action-card__arrow {
+    color: var(--violet-700);
+    background: #efe6ff;
+    transform: translateX(2px);
+}
+
+.an-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.an-back:hover {
+    color: var(--violet-700);
+    text-decoration: none;
+}
+
+.an-back svg {
+    width: 16px;
+    height: 16px;
+}
+
+.an-page-head {
+    margin-bottom: 20px;
+}
+
+.an-nilai-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+}
+
+.an-nilai-side,
+.an-nilai-main {
+    min-width: 0;
+}
+
+.an-field-stack {
+    display: grid;
+    gap: 0;
+}
+
+.an-field-stack .field {
+    margin-bottom: 12px;
+}
+
+.an-score-form--page {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+}
+
 /* Responsif --------------------------------------------------------------- */
 
 @media (max-width: 1040px) {
-    .an-input-grid {
+    .an-input-grid,
+    .an-input-cards,
+    .an-nilai-layout {
         grid-template-columns: minmax(0, 1fr);
     }
 }
@@ -581,6 +781,14 @@
     .an-legend {
         width: 100%;
     }
+
+    .an-action-card {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .an-action-card__arrow {
+        display: none;
+    }
 }
 
 @media (max-width: 480px) {
@@ -604,6 +812,12 @@
     .an-form-foot__note {
         text-align: center;
     }
+
+    .an-action-card {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+        padding: 18px 16px;
+    }
 }
 
 /* Cetak ------------------------------------------------------------------- */
@@ -616,15 +830,19 @@
     .an-score-form,
     .an-add-student,
     .an-assessment-item form,
-    #input-kehadiran,
-    #input-nilai,
+    .an-input-cards,
+    .an-section-head,
+    .an-back,
     #kelola-siswa {
         display: none !important;
     }
 
-    .an-chart-grid,
-    .an-input-grid {
+    .an-chart-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .an-nilai-layout {
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .an-card,
@@ -637,7 +855,8 @@
     .an-seg,
     .an-dist__fill,
     .an-legend__dot,
-    .an-legend--inline i {
+    .an-legend--inline i,
+    .an-action-card__icon {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }

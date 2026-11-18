@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Libraries\ProfilGuru;
 use Config\Sasmita;
 
 class Auth extends BaseController
@@ -74,6 +75,8 @@ class Auth extends BaseController
                 ->with('error', 'Email atau kata sandi salah. Silakan coba lagi.');
         }
 
+        $displayName = ProfilGuru::nama((string) $user['name']);
+
         // Cegah session fixation setelah login berhasil.
         session()->regenerate();
 
@@ -81,7 +84,7 @@ class Auth extends BaseController
             'isLoggedIn' => true,
             'user'       => [
                 'email' => $email,
-                'name'  => $user['name'],
+                'name'  => $displayName,
                 'role'  => $user['role'],
             ],
         ]);

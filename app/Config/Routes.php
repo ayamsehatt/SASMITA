@@ -20,14 +20,20 @@ $routes->post('rps/(:segment)/hapus', 'Rps::delete/$1');
 $routes->get('rps/(:segment)/materi/(:num)', 'Rps::material/$1/$2');
 $routes->get('rps/(:segment)', 'Rps::show/$1');
 
-// Analitik kelas: rekap kehadiran & nilai, plus tempat inputnya
+// Analitik kelas: rekap kehadiran & nilai, plus halaman input
 $routes->get('analitik', 'Analitik::index');
+$routes->get('analitik/kehadiran', 'Analitik::inputKehadiran');
 $routes->post('analitik/kehadiran', 'Analitik::saveAttendance');
+$routes->get('analitik/nilai', 'Analitik::inputNilai');
 $routes->post('analitik/asesmen', 'Analitik::storeAssessment');
 $routes->post('analitik/asesmen/(:num)/hapus', 'Analitik::deleteAssessment/$1');
 $routes->post('analitik/nilai', 'Analitik::saveScores');
 $routes->post('analitik/siswa', 'Analitik::storeStudent');
 $routes->post('analitik/siswa/(:num)/hapus', 'Analitik::deleteStudent/$1');
+
+// Pengaturan: profil guru
+$routes->get('pengaturan', 'Pengaturan::index');
+$routes->post('pengaturan', 'Pengaturan::update');
 
 // Asesmen: daftar draft, builder, dan unduh PDF
 $routes->get('asesmen', 'Asesmen::index');

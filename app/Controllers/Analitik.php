@@ -32,7 +32,7 @@ class Analitik extends BaseController
     }
 
     /**
-     * Rekap, grafik, sekaligus panel input kehadiran dan nilai.
+     * Rekap, grafik, dan kartu aksi input kehadiran/nilai.
      */
     public function index()
     {
@@ -40,40 +40,43 @@ class Analitik extends BaseController
             return $redirect;
         }
 
-        $studentRows    = $this->students
-            ->orderBy('class_name', 'ASC')
-            ->orderBy('nis', 'ASC')
-            ->orderBy('name', 'ASC')
-            ->findAll();
+        $studentRows    = $this->loadStudents();
         $attendanceRows = $this->attendance->findAll();
-        $assessmentRows = $this->assessments
-            ->orderBy('assessment_date', 'DESC')
-            ->orderBy('id', 'DESC')
-            ->findAll();
-        $scoreRows = $this->scores->findAll();
-
-        $selectedDate       = $this->resolveDate();
-        $selectedAssessment = $this->resolveAssessment($assessmentRows);
-
-        $attendanceMap = [];
-
-        foreach ($attendanceRows as $row) {
-            if ($row['attendance_date'] === $selectedDate) {
-                $attendanceMap[(int) $row['student_id']] = (string) $row['status'];
-            }
-        }
-
-        $scoreMap = [];
-
-        foreach ($scoreRows as $row) {
-            if ((int) $row['assessment_id'] === $selectedAssessment) {
-                $scoreMap[(int) $row['student_id']] = $row['score'] === null ? '' : (string) $row['score'];
-            }
-        }
+        $assessmentRows = $this->loadAssessments();
+        $scoreRows      = $this->scores->findAll();
 
         $report = new KelasReport($studentRows, $attendanceRows, $assessmentRows, $scoreRows);
         $kpi    = $report->kpi();
         $user   = session('user') ?? [];
+
+        $today      = date('Y-m-d');
+        $todayCount = 0;
+        $lastDate   = '';
+
+        foreach ($attendanceRows as $row) {
+            $date = (string) ($row['attendance_date'] ?? '');
+
+            if ($date === $today) {
+                $todayCount++;
+            }
+
+            if ($date !== '' && ($lastDate === '' || strcmp($date, $lastDate) > 0)) {
+                $lastDate = $date;
+            }
+        }
+
+        $attendanceCard = [
+            'students'   => count($studentRows),
+            'today'      => $todayCount,
+            'lastDate'   => $lastDate !== '' ? $this->shortDate($lastDate) : '',
+            'lastRaw'    => $lastDate,
+        ];
+
+        $nilaiCard = [
+            'assessments' => count($assessmentRows),
+            'scores'      => count($scoreRows),
+            'lastTitle'   => isset($assessmentRows[0]) ? (string) $assessmentRows[0]['title'] : '',
+        ];
 
         return view('analitik/index', [
             'title'              => 'Analitik Kelas · SASMITA',
@@ -86,16 +89,91 @@ class Analitik extends BaseController
             'trend'              => $report->trend(8),
             'distribution'       => $report->gradeDistribution(),
             'recap'              => $report->recap(),
-            'assessmentSummaries' => $report->assessmentSummaries($assessmentRows),
             'insights'           => $report->insights($assessmentRows),
             'kkm'                => KelasReport::KKM,
             'statusLabels'       => KelasReport::STATUS_LABELS,
             'students'           => $studentRows,
-            'assessments'        => $assessmentRows,
-            'selectedDate'       => $selectedDate,
-            'selectedAssessment' => $selectedAssessment,
-            'attendanceMap'      => $attendanceMap,
-            'scoreMap'           => $scoreMap,
+            'attendanceCard'     => $attendanceCard,
+            'nilaiCard'          => $nilaiCard,
+        ]);
+    }
+
+    /**
+     * Halaman input kehadiran per tanggal.
+     */
+    public function inputKehadiran()
+    {
+        if ($redirect = $this->guard()) {
+            return $redirect;
+        }
+
+        $studentRows    = $this->loadStudents();
+        $attendanceRows = $this->attendance->findAll();
+        $selectedDate   = $this->resolveDate();
+
+        $attendanceMap = [];
+
+        foreach ($attendanceRows as $row) {
+            if ((string) ($row['attendance_date'] ?? '') === $selectedDate) {
+                $attendanceMap[(int) $row['student_id']] = (string) $row['status'];
+            }
+        }
+
+        $user      = session('user') ?? [];
+        $className = $studentRows[0]['class_name'] ?? 'VII A';
+
+        return view('analitik/kehadiran', [
+            'title'         => 'Input Kehadiran · SASMITA',
+            'active'        => 'analitik',
+            'crumb'         => 'Input kehadiran',
+            'teacherName'   => (string) ($user['name'] ?? ''),
+            'className'     => (string) $className,
+            'statusLabels'  => KelasReport::STATUS_LABELS,
+            'students'      => $studentRows,
+            'selectedDate'  => $selectedDate,
+            'attendanceMap' => $attendanceMap,
+        ]);
+    }
+
+    /**
+     * Halaman input nilai per asesmen.
+     */
+    public function inputNilai()
+    {
+        if ($redirect = $this->guard()) {
+            return $redirect;
+        }
+
+        $studentRows    = $this->loadStudents();
+        $assessmentRows = $this->loadAssessments();
+        $scoreRows      = $this->scores->findAll();
+
+        $selectedAssessment = $this->resolveAssessment($assessmentRows);
+        $scoreMap           = [];
+
+        foreach ($scoreRows as $row) {
+            if ((int) ($row['assessment_id'] ?? 0) === $selectedAssessment) {
+                $scoreMap[(int) $row['student_id']] = $row['score'] === null ? '' : (string) $row['score'];
+            }
+        }
+
+        $report              = new KelasReport($studentRows, $this->attendance->findAll(), $assessmentRows, $scoreRows);
+        $assessmentSummaries = $report->assessmentSummaries($assessmentRows);
+        $user                = session('user') ?? [];
+        $className           = $studentRows[0]['class_name'] ?? 'VII A';
+
+        return view('analitik/nilai', [
+            'title'               => 'Input Nilai · SASMITA',
+            'active'              => 'analitik',
+            'crumb'               => 'Input nilai',
+            'teacherName'         => (string) ($user['name'] ?? ''),
+            'className'           => (string) $className,
+            'students'            => $studentRows,
+            'assessments'         => $assessmentRows,
+            'selectedAssessment'  => $selectedAssessment,
+            'scoreMap'            => $scoreMap,
+            'assessmentSummaries' => $assessmentSummaries,
+            'kkm'                 => KelasReport::KKM,
         ]);
     }
 
@@ -111,13 +189,13 @@ class Analitik extends BaseController
         $date = trim((string) $this->request->getPost('tanggal'));
 
         if (! $this->isValidDate($date, true)) {
-            return $this->fail('Tanggal kehadiran tidak valid atau bukan hari ini/masa lalu.', 'analitik');
+            return $this->fail('Tanggal kehadiran tidak valid atau bukan hari ini/masa lalu.', 'analitik/kehadiran');
         }
 
         $rawStatus = $this->request->getPost('kehadiran');
 
         if (! is_array($rawStatus) || $rawStatus === []) {
-            return $this->fail('Pilih status kehadiran minimal satu siswa.', 'analitik?tanggal=' . $date);
+            return $this->fail('Pilih status kehadiran minimal satu siswa.', 'analitik/kehadiran?tanggal=' . $date);
         }
 
         $allowed = [];
@@ -138,14 +216,14 @@ class Analitik extends BaseController
             $status = strtoupper(trim((string) $status));
 
             if (! isset(KelasReport::STATUS_LABELS[$status])) {
-                return $this->fail('Status kehadiran tidak dikenali.', 'analitik?tanggal=' . $date);
+                return $this->fail('Status kehadiran tidak dikenali.', 'analitik/kehadiran?tanggal=' . $date);
             }
 
             $entries[(int) $id] = $status;
         }
 
         if ($entries === []) {
-            return $this->fail('Tidak ada siswa yang dapat disimpan.', 'analitik?tanggal=' . $date);
+            return $this->fail('Tidak ada siswa yang dapat disimpan.', 'analitik/kehadiran?tanggal=' . $date);
         }
 
         $db = db_connect();
@@ -172,12 +250,12 @@ class Analitik extends BaseController
         $db->transComplete();
 
         return redirect()
-            ->to(site_url('analitik?tanggal=' . $date))
+            ->to(site_url('analitik/kehadiran?tanggal=' . $date))
             ->with('success', 'Kehadiran ' . count($entries) . ' siswa untuk tanggal ' . $this->longDate($date) . ' tersimpan.');
     }
 
     /**
-     * Buat asesmen baru lalu arahkan ke panel input nilai.
+     * Buat asesmen baru lalu arahkan ke halaman input nilai.
      */
     public function storeAssessment(): RedirectResponse
     {
@@ -204,7 +282,7 @@ class Analitik extends BaseController
         }
 
         if ($errors !== []) {
-            return $this->fail(implode(' ', $errors), 'analitik');
+            return $this->fail(implode(' ', $errors), 'analitik/nilai');
         }
 
         $id = $this->assessments->insert([
@@ -214,7 +292,7 @@ class Analitik extends BaseController
         ]);
 
         return redirect()
-            ->to(site_url('analitik?asesmen=' . (int) $id))
+            ->to(site_url('analitik/nilai?asesmen=' . (int) $id))
             ->with('success', 'Asesmen "' . $title . '" dibuat. Silakan isi nilainya.');
     }
 
@@ -227,17 +305,17 @@ class Analitik extends BaseController
             return $redirect;
         }
 
-        $id    = filter_var($id, FILTER_VALIDATE_INT);
-        $row   = $id === false ? null : $this->assessments->find((int) $id);
+        $id  = filter_var($id, FILTER_VALIDATE_INT);
+        $row = $id === false ? null : $this->assessments->find((int) $id);
 
         if ($row === null) {
-            return $this->fail('Asesmen tidak ditemukan.', 'analitik');
+            return $this->fail('Asesmen tidak ditemukan.', 'analitik/nilai');
         }
 
         $this->assessments->delete((int) $id);
 
         return redirect()
-            ->to(site_url('analitik'))
+            ->to(site_url('analitik/nilai'))
             ->with('success', 'Asesmen berhasil dihapus beserta nilainya.');
     }
 
@@ -251,14 +329,13 @@ class Analitik extends BaseController
         }
 
         $assessmentId = filter_var($this->request->getPost('asesmen_id'), FILTER_VALIDATE_INT);
-        $target       = 'analitik' . ($assessmentId !== false ? '?asesmen=' . (int) $assessmentId : '');
 
         if ($assessmentId === false || $this->assessments->find((int) $assessmentId) === null) {
-            return $this->fail('Asesmen tidak ditemukan.', 'analitik');
+            return $this->fail('Asesmen tidak ditemukan.', 'analitik/nilai');
         }
 
+        $target    = 'analitik/nilai?asesmen=' . (int) $assessmentId;
         $rawScores = $this->request->getPost('nilai');
-        $target    = 'analitik?asesmen=' . (int) $assessmentId;
 
         if (! is_array($rawScores)) {
             return $this->fail('Tidak ada nilai yang dikirim.', $target);
@@ -270,8 +347,8 @@ class Analitik extends BaseController
             $allowed[(int) $student['id']] = true;
         }
 
-        $entries  = [];
-        $cleared  = [];
+        $entries = [];
+        $cleared = [];
 
         foreach ($rawScores as $studentId => $value) {
             $id = filter_var($studentId, FILTER_VALIDATE_INT);
@@ -329,7 +406,7 @@ class Analitik extends BaseController
         $db->transComplete();
 
         return redirect()
-            ->to($target)
+            ->to(site_url($target))
             ->with('success', 'Nilai asesmen tersimpan (' . count($entries) . ' siswa dinilai).');
     }
 
@@ -343,7 +420,7 @@ class Analitik extends BaseController
         }
 
         if ($this->students->countAll() >= 100) {
-            return $this->fail('Batas maksimal 100 siswa per kelas sudah tercapai.', 'analitik');
+            return $this->fail('Batas maksimal 100 siswa per kelas sudah tercapai.', 'analitik#kelola-siswa');
         }
 
         $data = [
@@ -353,7 +430,7 @@ class Analitik extends BaseController
         ];
 
         if (! $this->students->validate($data)) {
-            return $this->fail(implode(' ', $this->students->errors()), 'analitik');
+            return $this->fail(implode(' ', $this->students->errors()), 'analitik#kelola-siswa');
         }
 
         $this->students->insert([
@@ -363,7 +440,7 @@ class Analitik extends BaseController
         ]);
 
         return redirect()
-            ->to(site_url('analitik'))
+            ->to(site_url('analitik#kelola-siswa'))
             ->with('success', 'Siswa ' . $data['name'] . ' ditambahkan.');
     }
 
@@ -380,14 +457,37 @@ class Analitik extends BaseController
         $row = $id === false ? null : $this->students->find((int) $id);
 
         if ($row === null) {
-            return $this->fail('Siswa tidak ditemukan.', 'analitik');
+            return $this->fail('Siswa tidak ditemukan.', 'analitik#kelola-siswa');
         }
 
         $this->students->delete((int) $id);
 
         return redirect()
-            ->to(site_url('analitik'))
+            ->to(site_url('analitik#kelola-siswa'))
             ->with('success', 'Siswa ' . $row['name'] . ' beserta data kehadiran dan nilainya dihapus.');
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function loadStudents(): array
+    {
+        return $this->students
+            ->orderBy('class_name', 'ASC')
+            ->orderBy('nis', 'ASC')
+            ->orderBy('name', 'ASC')
+            ->findAll();
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function loadAssessments(): array
+    {
+        return $this->assessments
+            ->orderBy('assessment_date', 'DESC')
+            ->orderBy('id', 'DESC')
+            ->findAll();
     }
 
     /**
@@ -453,6 +553,17 @@ class Analitik extends BaseController
         ];
 
         return date('j', $timestamp) . ' ' . $months[(int) date('n', $timestamp)] . ' ' . date('Y', $timestamp);
+    }
+
+    private function shortDate(string $date): string
+    {
+        $timestamp = strtotime($date);
+
+        if ($timestamp === false) {
+            return $date;
+        }
+
+        return date('d/m/Y', $timestamp);
     }
 
     private function guard(): ?RedirectResponse

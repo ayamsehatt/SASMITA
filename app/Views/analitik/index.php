@@ -60,6 +60,20 @@ $badgeClass = static function (string $tone): string {
 
     return 'pill pill--soft';
 };
+
+$attLast = trim((string) ($attendanceCard['lastDate'] ?? ''));
+$attMeta = [
+    (int) ($attendanceCard['students'] ?? 0) . ' siswa',
+    'hari ini ' . (int) ($attendanceCard['today'] ?? 0) . ' tercatat',
+    $attLast !== '' ? 'terakhir ' . $attLast : 'belum ada catatan',
+];
+
+$nilaiLast = trim((string) ($nilaiCard['lastTitle'] ?? ''));
+$nilaiMeta = [
+    (int) ($nilaiCard['assessments'] ?? 0) . ' asesmen',
+    (int) ($nilaiCard['scores'] ?? 0) . ' nilai tercatat',
+    $nilaiLast !== '' ? 'terakhir ' . $nilaiLast : 'belum ada asesmen',
+];
 ?>
 
 <div class="page-head">
@@ -71,16 +85,11 @@ $badgeClass = static function (string $tone): string {
             Rekap kelas <?= esc($className) ?>
         </span>
         <h1>Analitik kehadiran &amp; nilai</h1>
-        <p>
-            Pantau kehadiran dan capaian belajar siswa dalam satu tempat. Gunakan panel input
-            di bawah untuk mencatat kehadiran per pertemuan dan nilai tiap asesmen; grafik akan
-            diperbarui otomatis dari data yang tersimpan.
-        </p>
     </div>
 
     <div class="an-head-actions">
-        <a class="btn btn--ghost" href="#input-kehadiran">Input kehadiran</a>
-        <a class="btn btn--primary" href="#input-nilai">Input nilai</a>
+        <a class="btn btn--ghost" href="<?= site_url('analitik/kehadiran') ?>">Input kehadiran</a>
+        <a class="btn btn--primary" href="<?= site_url('analitik/nilai') ?>">Input nilai</a>
         <button type="button" class="btn btn--soft" data-print>Cetak rekap</button>
     </div>
 </div>
@@ -180,7 +189,7 @@ $badgeClass = static function (string $tone): string {
         </div>
         <div class="card__body">
             <?php if ($trend === []) : ?>
-                <p class="an-placeholder">Belum ada kehadiran yang tercatat. Isi panel input kehadiran untuk melihat grafik.</p>
+                <p class="an-placeholder">Belum ada kehadiran yang tercatat. Buka halaman <a href="<?= site_url('analitik/kehadiran') ?>">Input kehadiran</a> untuk mencatat dan melihat grafik.</p>
             <?php else : ?>
                 <div class="an-trend">
                     <?php foreach ($trend as $day) : ?>
@@ -297,158 +306,60 @@ $badgeClass = static function (string $tone): string {
     </div>
 </section>
 
-<section class="an-input-grid">
-    <div class="card an-card" id="input-kehadiran">
-        <div class="card__head">
-            <div>
-                <h2>Input kehadiran</h2>
-                <p>Pilih tanggal, lalu tentukan status setiap siswa</p>
-            </div>
-        </div>
-        <div class="card__body">
-            <form class="an-toolbar" method="get" action="<?= site_url('analitik') ?>">
-                <div class="field an-toolbar__field">
-                    <label for="tanggal-kehadiran">Tanggal pertemuan</label>
-                    <input type="date" id="tanggal-kehadiran" name="tanggal" value="<?= esc($selectedDate, 'attr') ?>" max="<?= esc(date('Y-m-d'), 'attr') ?>" required>
-                </div>
-                <button type="submit" class="btn btn--ghost btn--sm">Tampilkan</button>
-            </form>
-
-            <?php if ($students === []) : ?>
-                <p class="an-placeholder">Tambahkan siswa terlebih dahulu pada panel Kelola siswa.</p>
-            <?php else : ?>
-                <form method="post" action="<?= site_url('analitik/kehadiran') ?>">
-                    <input type="hidden" name="tanggal" value="<?= esc($selectedDate, 'attr') ?>">
-                    <div class="table-wrap an-table-wrap">
-                        <table class="an-table an-table--input">
-                            <thead>
-                            <tr>
-                                <th>NIS</th>
-                                <th>Nama siswa</th>
-                                <th>Status kehadiran</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <?php foreach ($students as $student) : ?>
-                                <?php $studentId = (int) $student['id']; ?>
-                                <tr>
-                                    <td class="an-cell--muted"><?= esc($student['nis'] !== null && $student['nis'] !== '' ? $student['nis'] : '—') ?></td>
-                                    <td><strong><?= esc($student['name']) ?></strong></td>
-                                    <td>
-                                        <select name="kehadiran[<?= esc($studentId, 'attr') ?>]" aria-label="Kehadiran <?= esc($student['name'], 'attr') ?>">
-                                            <?php foreach ($statusLabels as $code => $label) : ?>
-                                                <option value="<?= esc($code, 'attr') ?>" <?= ($attendanceMap[$studentId] ?? 'H') === $code ? 'selected' : '' ?>>
-                                                    <?= esc($label) ?> (<?= esc($code) ?>)
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="an-form-foot">
-                        <span class="an-form-foot__note">Data pada tanggal yang sama akan diperbarui.</span>
-                        <button type="submit" class="btn btn--primary">Simpan kehadiran</button>
-                    </div>
-                </form>
-            <?php endif; ?>
+<section class="an-section">
+    <div class="an-section-head">
+        <div>
+            <h2>Input data</h2>
+            <p>Catat kehadiran per pertemuan atau nilai tiap asesmen pada halaman terpisah.</p>
         </div>
     </div>
 
-    <div class="card an-card" id="input-nilai">
-        <div class="card__head">
-            <div>
-                <h2>Input nilai</h2>
-                <p>Buat asesmen baru atau pilih asesmen yang sudah ada</p>
-            </div>
-        </div>
-        <div class="card__body">
-            <div class="an-assessment-list">
-                <?php if ($assessments === []) : ?>
-                    <p class="an-placeholder an-placeholder--small">Belum ada asesmen. Buat asesmen baru di bawah.</p>
-                <?php else : ?>
-                    <?php foreach ($assessmentSummaries as $summary) : ?>
-                        <div class="an-assessment-item <?= (int) $summary['id'] === (int) $selectedAssessment ? 'is-active' : '' ?>">
-                            <a href="<?= site_url('analitik?asesmen=' . (int) $summary['id']) ?>">
-                                <strong><?= esc($summary['title']) ?></strong>
-                                <span><?= esc($summary['label']) ?> · <?= esc($summary['date']) ?> · <?= esc($summary['count']) ?> dinilai</span>
-                            </a>
-                            <form method="post" action="<?= site_url('analitik/asesmen/' . (int) $summary['id'] . '/hapus') ?>" onsubmit="return confirm('Hapus asesmen ini beserta seluruh nilainya?');">
-                                <button type="submit" class="icon-btn" aria-label="Hapus asesmen <?= esc($summary['title'], 'attr') ?>" title="Hapus asesmen">
-                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                        <path d="M4.5 7h15M9.5 7V4.8h5V7M6.5 7l.8 12.2a1.8 1.8 0 0 0 1.8 1.7h5.8a1.8 1.8 0 0 0 1.8-1.7L17.5 7M10 11v5.5M14 11v5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-                            </form>
-                        </div>
+    <div class="an-input-cards">
+        <a class="card an-action-card an-action-card--attendance" href="<?= site_url('analitik/kehadiran') ?>">
+            <span class="an-action-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <rect x="4" y="5.5" width="16" height="14" rx="2.5" stroke="currentColor" stroke-width="1.7"/>
+                    <path d="M8 3.5v4M16 3.5v4M4 10h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    <path d="M8.2 14.2l1.8 1.8 3.8-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            <div class="an-action-card__body">
+                <span class="an-action-card__eyebrow">Kehadiran</span>
+                <h3>Input kehadiran</h3>
+                <p>Pilih tanggal pertemuan, lalu tandai status hadir, sakit, izin, atau alfa untuk setiap siswa.</p>
+                <ul class="an-action-card__meta">
+                    <?php foreach ($attMeta as $item) : ?>
+                        <li><?= esc($item) ?></li>
                     <?php endforeach; ?>
-                <?php endif; ?>
+                </ul>
             </div>
+            <span class="an-action-card__arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+        </a>
 
-            <form class="an-new-assessment" method="post" action="<?= site_url('analitik/asesmen') ?>">
-                <div class="an-new-assessment__title">Buat asesmen baru</div>
-                <div class="an-field-row">
-                    <div class="field">
-                        <label for="asesmen-judul">Judul asesmen</label>
-                        <input type="text" id="asesmen-judul" name="title" value="<?= old('title') ?>" placeholder="Contoh: Ulangan Harian Bab 2" required>
-                    </div>
-                    <div class="field">
-                        <label for="asesmen-jenis">Jenis</label>
-                        <select id="asesmen-jenis" name="type">
-                            <option value="formatif">Formatif</option>
-                            <option value="tugas">Tugas</option>
-                            <option value="sumatif">Sumatif</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="asesmen-tanggal">Tanggal</label>
-                        <input type="date" id="asesmen-tanggal" name="assessment_date" value="<?= esc($selectedDate, 'attr') ?>" max="<?= esc(date('Y-m-d'), 'attr') ?>" required>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn--soft btn--sm">Tambah asesmen</button>
-            </form>
-
-            <?php if ($selectedAssessment > 0 && $students !== []) : ?>
-                <form class="an-score-form" method="post" action="<?= site_url('analitik/nilai') ?>">
-                    <input type="hidden" name="asesmen_id" value="<?= esc($selectedAssessment, 'attr') ?>">
-                    <div class="an-score-form__title">Isi nilai</div>
-                    <div class="table-wrap an-table-wrap">
-                        <table class="an-table an-table--input">
-                            <thead>
-                            <tr>
-                                <th>NIS</th>
-                                <th>Nama siswa</th>
-                                <th class="an-cell--num">Nilai (0–100)</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <?php foreach ($students as $student) : ?>
-                                <?php $studentId = (int) $student['id']; ?>
-                                <tr>
-                                    <td class="an-cell--muted"><?= esc($student['nis'] !== null && $student['nis'] !== '' ? $student['nis'] : '—') ?></td>
-                                    <td><strong><?= esc($student['name']) ?></strong></td>
-                                    <td class="an-cell--num">
-                                        <input type="number"
-                                               name="nilai[<?= esc($studentId, 'attr') ?>]"
-                                               min="0" max="100" step="1"
-                                               placeholder="—"
-                                               value="<?= esc($scoreMap[$studentId] ?? '', 'attr') ?>"
-                                               aria-label="Nilai <?= esc($student['name'], 'attr') ?>">
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="an-form-foot">
-                        <span class="an-form-foot__note">Kosongkan kolom untuk menandai "belum dinilai".</span>
-                        <button type="submit" class="btn btn--primary">Simpan nilai</button>
-                    </div>
-                </form>
-            <?php endif; ?>
-        </div>
+        <a class="card an-action-card an-action-card--nilai" href="<?= site_url('analitik/nilai') ?>">
+            <span class="an-action-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M6 4.5h9l3 3v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                    <path d="M15 4.5v3h3M8 13h8M8 16.5h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    <path d="M8.2 10.2l1.3 1.3 2.5-2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            <div class="an-action-card__body">
+                <span class="an-action-card__eyebrow">Nilai</span>
+                <h3>Input nilai</h3>
+                <p>Buat asesmen baru atau pilih asesmen yang sudah ada, lalu isi nilai siswa pada halaman khusus.</p>
+                <ul class="an-action-card__meta">
+                    <?php foreach ($nilaiMeta as $item) : ?>
+                        <li><?= esc($item) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+            <span class="an-action-card__arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+        </a>
     </div>
 </section>
 

@@ -64,7 +64,7 @@ $initial = strtoupper(substr($user['name'] ?? 'G', 0, 1));
 
             <p class="side-label side-label--spaced">Akun</p>
 
-            <a class="side-link" href="#" data-coming-soon>
+            <a class="side-link<?= ($active ?? '') === 'pengaturan' ? ' is-active' : '' ?>" href="<?= site_url('pengaturan') ?>">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>
                     <path d="M19.4 13.4a7.8 7.8 0 0 0 0-2.8l1.8-1.3-2-3.4-2.1.9a7.7 7.7 0 0 0-2.4-1.4L14.4 3h-4l-.3 2.4a7.7 7.7 0 0 0-2.4 1.4l-2.1-.9-2 3.4 1.8 1.3a7.8 7.8 0 0 0 0 2.8l-1.8 1.3 2 3.4 2.1-.9a7.7 7.7 0 0 0 2.4 1.4l.3 2.4h4l.3-2.4a7.7 7.7 0 0 0 2.4-1.4l2.1.9 2-3.4-1.8-1.3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
