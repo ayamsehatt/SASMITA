@@ -55,7 +55,7 @@ $initial = strtoupper(substr($user['name'] ?? 'G', 0, 1));
                 <span>Asesmen</span>
             </a>
 
-            <a class="side-link" href="#" data-coming-soon>
+            <a class="side-link<?= ($active ?? '') === 'analitik' ? ' is-active' : '' ?>" href="<?= site_url('analitik') ?>">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M4.5 19.5V13M9.8 19.5V7.5M15.2 19.5v-4.5M20.5 19.5V4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                 </svg>

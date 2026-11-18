@@ -1,0 +1,644 @@
+/* ==========================================================================
+   SASMITA — Analitik kehadiran & nilai
+   ========================================================================== */
+
+.an-head-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.an-stats {
+    margin-bottom: 22px;
+}
+
+.an-chart-grid,
+.an-input-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    align-items: start;
+}
+
+.an-chart-grid {
+    margin-bottom: 22px;
+}
+
+.an-card {
+    min-width: 0;
+}
+
+.an-card .card__head {
+    padding: 18px 20px 14px;
+}
+
+.an-card .card__body {
+    padding: 20px;
+}
+
+.an-card__note {
+    margin: 16px 0 0;
+    color: var(--muted-2);
+    font-size: 0.72rem;
+    line-height: 1.6;
+}
+
+.an-placeholder {
+    margin: 0;
+    padding: 24px 18px;
+    border: 1.5px dashed #ddcffa;
+    border-radius: 14px;
+    background: #fbf9ff;
+    color: var(--muted);
+    font-size: 0.83rem;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.an-placeholder--small {
+    padding: 14px;
+    font-size: 0.78rem;
+    text-align: left;
+}
+
+/* Komposisi kehadiran ------------------------------------------------------- */
+
+.an-donut-body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 26px;
+    min-height: 212px;
+}
+
+.an-donut {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 172px;
+    height: 172px;
+    border-radius: 50%;
+    box-shadow: 0 14px 32px -22px rgba(46, 16, 90, 0.65);
+}
+
+.an-donut__center {
+    display: grid;
+    place-items: center;
+    width: 116px;
+    height: 116px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 1px #f1ecfb inset;
+    text-align: center;
+}
+
+.an-donut__center strong {
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+
+.an-donut__center span {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.an-legend {
+    display: grid;
+    flex: 1;
+    gap: 11px;
+    min-width: 190px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.an-legend li {
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 9px;
+    font-size: 0.8rem;
+}
+
+.an-legend__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.an-legend__label {
+    color: var(--ink-soft);
+    font-weight: 600;
+}
+
+.an-legend__percent {
+    min-width: 48px;
+    color: var(--muted-2);
+    font-size: 0.74rem;
+    text-align: right;
+}
+
+.an-legend--inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    min-width: 0;
+}
+
+.an-legend--inline span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.an-legend--inline i {
+    width: 8px;
+    height: 8px;
+    border-radius: 3px;
+}
+
+/* Tren kehadiran ----------------------------------------------------------- */
+
+.an-trend {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    height: 212px;
+    overflow-x: auto;
+    padding-top: 4px;
+}
+
+.an-trend__item {
+    display: flex;
+    flex: 1 0 44px;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+}
+
+.an-trend__value {
+    color: var(--ink-soft);
+    font-size: 0.69rem;
+    font-weight: 800;
+}
+
+.an-trend__bar {
+    display: flex;
+    flex: 1;
+    flex-direction: column-reverse;
+    width: 100%;
+    max-width: 46px;
+    min-height: 130px;
+    overflow: hidden;
+    border-radius: 9px 9px 4px 4px;
+    background: #f4f0fc;
+}
+
+.an-seg {
+    display: block;
+    width: 100%;
+    min-height: 2px;
+}
+
+.an-seg--h { background: #0f7b4d; }
+.an-seg--s { background: #d97706; }
+.an-seg--i { background: #4361ee; }
+.an-seg--a { background: #c0264f; }
+
+.an-trend__date {
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Distribusi nilai & insight ----------------------------------------------- */
+
+.an-dist {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr) 26px 44px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 13px;
+    font-size: 0.78rem;
+}
+
+.an-dist__label {
+    color: var(--ink-soft);
+    font-weight: 700;
+}
+
+.an-dist__track {
+    height: 10px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #f3eefc;
+}
+
+.an-dist__fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+
+.an-dist__fill--excellent { background: linear-gradient(90deg, #0f7b4d, #34b27b); }
+.an-dist__fill--good      { background: linear-gradient(90deg, #6d28d9, #a855f7); }
+.an-dist__fill--fair      { background: linear-gradient(90deg, #d97706, #f0ab43); }
+.an-dist__fill--low       { background: linear-gradient(90deg, #c0264f, #ec4899); }
+
+.an-dist__value {
+    text-align: right;
+}
+
+.an-dist__percent {
+    color: var(--muted-2);
+    font-size: 0.72rem;
+    text-align: right;
+}
+
+.an-insights {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.an-insight {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px 13px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    color: var(--ink-soft);
+    font-size: 0.79rem;
+    line-height: 1.55;
+}
+
+.an-insight__dot {
+    flex: none;
+    width: 7px;
+    height: 7px;
+    margin-top: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.an-insight--warn {
+    border-color: #ffe6b8;
+    background: var(--warning-bg);
+    color: #8a5a00;
+}
+
+.an-insight--info {
+    border-color: #e6d9ff;
+    background: #f8f3ff;
+    color: var(--violet-700);
+}
+
+.an-insight--ok {
+    border-color: #c9eeda;
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+/* Tabel ------------------------------------------------------------------- */
+
+.an-section {
+    margin-bottom: 22px;
+}
+
+.an-table-wrap {
+    margin: 0 20px 20px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+}
+
+.an-card > .table-wrap {
+    margin: 0;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+}
+
+.an-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.79rem;
+}
+
+.an-table thead th {
+    padding: 11px 14px;
+    background: #faf7ff;
+    color: var(--muted);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.an-table tbody td {
+    padding: 11px 14px;
+    border-top: 1px solid #f2edfc;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    vertical-align: middle;
+}
+
+.an-table tbody tr:hover td {
+    background: #fdfbff;
+}
+
+.an-cell--num {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.an-cell--muted {
+    color: var(--muted-2) !important;
+    font-size: 0.75rem;
+}
+
+.an-empty-cell {
+    padding: 24px !important;
+    color: var(--muted) !important;
+    text-align: center;
+}
+
+.an-count--h { color: #0f7b4d !important; font-weight: 700; }
+.an-count--s { color: #b45309 !important; font-weight: 700; }
+.an-count--i { color: #4361ee !important; font-weight: 700; }
+.an-count--a { color: #c0264f !important; font-weight: 700; }
+
+.an-table td form {
+    display: inline-flex;
+}
+
+/* Panel input -------------------------------------------------------------- */
+
+.an-card input[type="date"],
+.an-card input[type="number"],
+.an-card select {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    background: #fbfaff;
+    color: var(--ink);
+    font-size: 0.82rem;
+    outline: none;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.an-card input[type="date"]:focus,
+.an-card input[type="number"]:focus,
+.an-card select:focus {
+    border-color: #a97bff;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.14);
+}
+
+.an-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f1ecfb;
+}
+
+.an-toolbar__field {
+    flex: 1 1 180px;
+    max-width: 280px;
+    margin-bottom: 0;
+}
+
+.an-table--input td {
+    padding: 8px 10px;
+}
+
+.an-table--input select,
+.an-table--input input[type="number"] {
+    max-width: 160px;
+    padding: 7px 9px;
+    font-size: 0.78rem;
+}
+
+.an-form-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.an-form-foot__note {
+    color: var(--muted-2);
+    font-size: 0.72rem;
+}
+
+.an-assessment-list {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.an-assessment-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fbf9ff;
+}
+
+.an-assessment-item.is-active {
+    border-color: #c9aaf8;
+    background: #f7f0ff;
+}
+
+.an-assessment-item a {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.an-assessment-item a:hover {
+    color: var(--violet-700);
+    text-decoration: none;
+}
+
+.an-assessment-item a strong {
+    overflow: hidden;
+    font-size: 0.81rem;
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.an-assessment-item a span {
+    color: var(--muted);
+    font-size: 0.7rem;
+}
+
+.an-new-assessment,
+.an-score-form {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid #f1ecfb;
+}
+
+.an-new-assessment__title,
+.an-score-form__title {
+    margin-bottom: 12px;
+    color: var(--violet-700);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.an-field-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.an-field-row .field {
+    flex: 1 1 150px;
+    margin-bottom: 12px;
+}
+
+.an-field-row button {
+    margin-bottom: 12px;
+}
+
+.an-add-student {
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #f1ecfb;
+}
+
+.an-add-student .field {
+    margin-bottom: 0;
+}
+
+.an-add-student button {
+    margin-bottom: 0;
+}
+
+/* Responsif --------------------------------------------------------------- */
+
+@media (max-width: 1040px) {
+    .an-input-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .an-chart-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 720px) {
+    .an-head-actions {
+        width: 100%;
+    }
+
+    .an-head-actions .btn {
+        flex: 1;
+    }
+
+    .an-donut-body {
+        justify-content: center;
+    }
+
+    .an-legend {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .an-card .card__body {
+        padding: 16px;
+    }
+
+    .an-table-wrap {
+        margin: 0 16px 16px;
+    }
+
+    .an-form-foot {
+        align-items: stretch;
+        flex-direction: column-reverse;
+    }
+
+    .an-form-foot .btn {
+        width: 100%;
+    }
+
+    .an-form-foot__note {
+        text-align: center;
+    }
+}
+
+/* Cetak ------------------------------------------------------------------- */
+
+@media print {
+    .an-head-actions,
+    .an-toolbar,
+    .an-form-foot,
+    .an-new-assessment,
+    .an-score-form,
+    .an-add-student,
+    .an-assessment-item form,
+    #input-kehadiran,
+    #input-nilai,
+    #kelola-siswa {
+        display: none !important;
+    }
+
+    .an-chart-grid,
+    .an-input-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .an-card,
+    .an-section {
+        box-shadow: none;
+        break-inside: avoid;
+    }
+
+    .an-donut,
+    .an-seg,
+    .an-dist__fill,
+    .an-legend__dot,
+    .an-legend--inline i {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}

@@ -17,8 +17,7 @@
         </span>
         <h1>Draft asesmen</h1>
         <p>
-            Setiap kartu berisi satu paket asesmen lengkap: identitas, daftar soal, dan kunci
-            jawaban. Buka kartu untuk mengedit, atau buat draft baru untuk mulai menyusun.
+           
         </p>
     </div>
 
@@ -48,13 +47,6 @@
         <strong data-draft-total>0</strong>
         <span>draft tersimpan di browser ini</span>
     </div>
-
-    <a class="btn btn--ghost btn--sm" href="<?= site_url('asesmen/baru') ?>">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/>
-        </svg>
-        Tambah draft
-    </a>
 </div>
 
 <p class="draft-loading" data-draft-loading>Memuat draft asesmen…</p>
