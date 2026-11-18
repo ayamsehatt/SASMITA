@@ -17,6 +17,7 @@ $routes->get('rps/create', 'Rps::create');
 $routes->post('rps', 'Rps::store');
 $routes->get('rps/(:segment)/sumber', 'Rps::downloadSource/$1');
 $routes->post('rps/(:segment)/hapus', 'Rps::delete/$1');
+$routes->get('rps/(:segment)/materi/(:num)', 'Rps::material/$1/$2');
 $routes->get('rps/(:segment)', 'Rps::show/$1');
 
 // Analitik kelas: rekap kehadiran & nilai, plus tempat inputnya

@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class AssessmentModel extends Model
 {
-    protected $table            = 'assessments';
+    protected $table            = 'asesmen';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';

@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class CreateAssessmentsTable extends Migration
+class CreateSiswaTable extends Migration
 {
     public function up(): void
     {
@@ -15,17 +15,19 @@ class CreateAssessmentsTable extends Migration
                 'unsigned'       => true,
                 'auto_increment' => true,
             ],
-            'title' => [
+            'nis' => [
                 'type'       => 'VARCHAR',
-                'constraint' => 120,
+                'constraint' => 20,
+                'null'       => true,
             ],
-            'type' => [
-                'type'       => "ENUM('tugas','formatif','sumatif')",
-                'null'       => false,
-                'default'    => 'formatif',
+            'name' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 80,
             ],
-            'assessment_date' => [
-                'type' => 'DATE',
+            'class_name' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 40,
+                'default'    => 'VII A',
             ],
             'created_at' => [
                 'type' => 'DATETIME',
@@ -38,12 +40,12 @@ class CreateAssessmentsTable extends Migration
         ]);
 
         $this->forge->addKey('id', true);
-        $this->forge->addKey('assessment_date');
-        $this->forge->createTable('assessments', true);
+        $this->forge->addKey('nis', false, true);
+        $this->forge->createTable('siswa', true);
     }
 
     public function down(): void
     {
-        $this->forge->dropTable('assessments', true);
+        $this->forge->dropTable('siswa', true);
     }
 }

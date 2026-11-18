@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class StudentModel extends Model
 {
-    protected $table            = 'students';
+    protected $table            = 'siswa';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
@@ -19,7 +19,7 @@ class StudentModel extends Model
 
     protected $validationRules = [
         'name'       => 'required|min_length[2]|max_length[80]',
-        'nis'        => 'permit_empty|max_length[20]|is_unique[students.nis,id,{id}]',
+        'nis'        => 'permit_empty|max_length[20]|is_unique[siswa.nis,id,{id}]',
         'class_name' => 'permit_empty|max_length[40]',
     ];
 

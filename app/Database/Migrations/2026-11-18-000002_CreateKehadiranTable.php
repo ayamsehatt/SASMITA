@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class CreateAttendanceTable extends Migration
+class CreateKehadiranTable extends Migration
 {
     public function up(): void
     {
@@ -16,17 +16,17 @@ class CreateAttendanceTable extends Migration
                 'auto_increment' => true,
             ],
             'student_id' => [
-                'type'     => 'INT',
+                'type'       => 'INT',
                 'constraint' => 11,
-                'unsigned' => true,
+                'unsigned'   => true,
             ],
             'attendance_date' => [
                 'type' => 'DATE',
             ],
             'status' => [
-                'type'       => "ENUM('H','S','I','A')",
-                'null'       => false,
-                'default'    => 'H',
+                'type'    => "ENUM('H','S','I','A')",
+                'null'    => false,
+                'default' => 'H',
             ],
             'created_at' => [
                 'type' => 'DATETIME',
@@ -41,12 +41,12 @@ class CreateAttendanceTable extends Migration
         $this->forge->addKey('id', true);
         $this->forge->addKey(['student_id', 'attendance_date'], false, true);
         $this->forge->addKey('attendance_date');
-        $this->forge->addForeignKey('student_id', 'students', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('attendance', true);
+        $this->forge->addForeignKey('student_id', 'siswa', 'id', 'CASCADE', 'CASCADE');
+        $this->forge->createTable('kehadiran', true);
     }
 
     public function down(): void
     {
-        $this->forge->dropTable('attendance', true);
+        $this->forge->dropTable('kehadiran', true);
     }
 }

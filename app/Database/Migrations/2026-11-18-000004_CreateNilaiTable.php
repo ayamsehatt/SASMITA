@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class CreateScoresTable extends Migration
+class CreateNilaiTable extends Migration
 {
     public function up(): void
     {
@@ -26,10 +26,10 @@ class CreateScoresTable extends Migration
                 'unsigned'   => true,
             ],
             'score' => [
-                'type'     => 'TINYINT',
+                'type'       => 'TINYINT',
                 'constraint' => 3,
-                'unsigned' => true,
-                'null'     => true,
+                'unsigned'   => true,
+                'null'       => true,
             ],
             'created_at' => [
                 'type' => 'DATETIME',
@@ -43,13 +43,13 @@ class CreateScoresTable extends Migration
 
         $this->forge->addKey('id', true);
         $this->forge->addKey(['assessment_id', 'student_id'], false, true);
-        $this->forge->addForeignKey('assessment_id', 'assessments', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->addForeignKey('student_id', 'students', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('scores', true);
+        $this->forge->addForeignKey('assessment_id', 'asesmen', 'id', 'CASCADE', 'CASCADE');
+        $this->forge->addForeignKey('student_id', 'siswa', 'id', 'CASCADE', 'CASCADE');
+        $this->forge->createTable('nilai', true);
     }
 
     public function down(): void
     {
-        $this->forge->dropTable('scores', true);
+        $this->forge->dropTable('nilai', true);
     }
 }

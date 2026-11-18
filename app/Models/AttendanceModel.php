@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class AttendanceModel extends Model
 {
-    protected $table            = 'attendance';
+    protected $table            = 'kehadiran';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';

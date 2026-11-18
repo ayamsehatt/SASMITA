@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class ScoreModel extends Model
 {
-    protected $table            = 'scores';
+    protected $table            = 'nilai';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';

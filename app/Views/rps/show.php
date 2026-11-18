@@ -1,5 +1,9 @@
 <?= $this->extend('layouts/app') ?>
 
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/css/materi.css') ?>">
+<?= $this->endSection() ?>
+
 <?= $this->section('content') ?>
 
 <a class="back-link" href="<?= site_url('rps') ?>">
@@ -178,13 +182,13 @@ $sizeText = $size >= 1048576
     <div class="card__head">
         <div>
             <h2>Alur pembelajaran</h2>
-            <p>Rincian 16 pertemuan, kegiatan, materi, dan penilaian.</p>
+            <p>Klik topik untuk melihat materi &amp; panduan belajar (dummy AI). Rincian 16 pertemuan, kegiatan, dan penilaian.</p>
         </div>
         <span class="pill pill--soft"><?= esc($item['total_meetings']) ?> pertemuan</span>
     </div>
 
     <div class="table-wrap">
-        <table class="plan-table">
+        <table class="plan-table" data-materi-base="<?= esc(site_url('rps/' . $item['id'] . '/materi'), 'attr') ?>">
             <thead>
                 <tr>
                     <th scope="col">Pekan</th>
@@ -196,11 +200,25 @@ $sizeText = $size >= 1048576
             </thead>
             <tbody>
                 <?php foreach ($item['meetings'] as $meeting) : ?>
+                    <?php $week = (int) ($meeting['week'] ?? 0); ?>
                     <tr>
-                        <td><span class="week"><?= esc($meeting['week']) ?></span></td>
+                        <td><span class="week"><?= esc($week) ?></span></td>
                         <td>
-                            <span class="topic"><?= esc($meeting['topic']) ?></span>
-                            <span class="materials"><?= esc($meeting['materials']) ?></span>
+                            <button type="button"
+                                    class="materi-trigger"
+                                    data-materi-week="<?= esc($week, 'attr') ?>"
+                                    aria-haspopup="dialog"
+                                    aria-controls="materi-drawer">
+                                <span class="materi-trigger__text">
+                                    <span class="topic"><?= esc($meeting['topic']) ?></span>
+                                    <span class="materials"><?= esc($meeting['materials']) ?></span>
+                                </span>
+                                <span class="materi-trigger__icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                            </button>
                         </td>
                         <td>
                             <ul class="activities">
@@ -293,14 +311,407 @@ $sizeText = $size >= 1048576
     </form>
 </section>
 
+<?= $this->include('rps/_materi_drawer') ?>
+
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
 <script>
-    document.querySelectorAll('[data-print]').forEach(function (button) {
-        button.addEventListener('click', function () {
-            window.print();
+    (function () {
+        'use strict';
+
+        document.querySelectorAll('[data-print]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                window.print();
+            });
         });
-    });
+
+        var drawer = document.getElementById('materi-drawer');
+        var backdrop = document.querySelector('[data-materi-backdrop]');
+        var closeBtn = document.querySelector('[data-materi-close]');
+        var copyBtn = document.querySelector('[data-materi-copy]');
+        var downloadBtn = document.querySelector('[data-materi-download]');
+        var body = document.querySelector('[data-materi-body]');
+        var titleEl = document.querySelector('[data-materi-title]');
+        var metaEl = document.querySelector('[data-materi-meta]');
+        var table = document.querySelector('[data-materi-base]');
+
+        if (!drawer || !body || !table) {
+            return;
+        }
+
+        var baseUrl = table.getAttribute('data-materi-base') || '';
+        var lastTrigger = null;
+        var currentData = null;
+        var currentRequest = 0;
+
+        function setText(el, text) {
+            if (!el) return;
+            el.textContent = text == null ? '' : String(text);
+        }
+
+        function clear(node) {
+            while (node.firstChild) {
+                node.removeChild(node.firstChild);
+            }
+        }
+
+        function el(tag, className, text) {
+            var node = document.createElement(tag);
+            if (className) {
+                node.className = className;
+            }
+            if (text != null) {
+                node.textContent = text;
+            }
+            return node;
+        }
+
+        function showSkeleton() {
+            clear(body);
+            var wrap = el('div', 'materi-skeleton');
+            var status = el('div', 'materi-skeleton__status');
+            var spark = el('span', 'materi-skeleton__spark');
+            spark.setAttribute('aria-hidden', 'true');
+            status.appendChild(spark);
+            status.appendChild(document.createTextNode('AI sedang menyusun materi...'));
+            wrap.appendChild(status);
+            var widths = ['92%', '100%', '76%', '100%', '58%', '100%', '84%', '64%'];
+            widths.forEach(function (w) {
+                var line = el('div', 'materi-skeleton__line');
+                line.style.width = w;
+                wrap.appendChild(line);
+            });
+            body.appendChild(wrap);
+        }
+
+        function renderError(message) {
+            clear(body);
+            var box = el('div', 'materi-error');
+            box.appendChild(el('strong', null, 'Materi tidak dapat dimuat'));
+            box.appendChild(el('p', null, message || 'Terjadi kesalahan. Silakan coba lagi.'));
+            body.appendChild(box);
+        }
+
+        function renderData(data) {
+            clear(body);
+
+            if (data.summary) {
+                var summary = el('section', 'materi-section materi-section--summary');
+                summary.appendChild(el('h3', 'materi-section__title', 'Ringkasan'));
+                summary.appendChild(el('p', 'materi-summary', data.summary));
+                body.appendChild(summary);
+            }
+
+            if (Array.isArray(data.objectives) && data.objectives.length) {
+                var obj = el('section', 'materi-section');
+                obj.appendChild(el('h3', 'materi-section__title', 'Tujuan sesi'));
+                var ul = el('ul', 'materi-list');
+                data.objectives.forEach(function (item) {
+                    ul.appendChild(el('li', null, item));
+                });
+                obj.appendChild(ul);
+                body.appendChild(obj);
+            }
+
+            if (Array.isArray(data.sections) && data.sections.length) {
+                var mat = el('section', 'materi-section');
+                mat.appendChild(el('h3', 'materi-section__title', 'Materi inti'));
+                data.sections.forEach(function (sec) {
+                    var block = el('article', 'materi-block');
+                    if (sec.heading) {
+                        block.appendChild(el('h4', 'materi-block__heading', sec.heading));
+                    }
+                    if (Array.isArray(sec.paragraphs)) {
+                        sec.paragraphs.forEach(function (p) {
+                            if (p) block.appendChild(el('p', null, p));
+                        });
+                    }
+                    if (Array.isArray(sec.points) && sec.points.length) {
+                        var pul = el('ul', 'materi-list materi-list--compact');
+                        sec.points.forEach(function (pt) {
+                            pul.appendChild(el('li', null, pt));
+                        });
+                        block.appendChild(pul);
+                    }
+                    mat.appendChild(block);
+                });
+                body.appendChild(mat);
+            }
+
+            if (Array.isArray(data.key_terms) && data.key_terms.length) {
+                var kt = el('section', 'materi-section');
+                kt.appendChild(el('h3', 'materi-section__title', 'Istilah kunci'));
+                var grid = el('div', 'materi-terms');
+                data.key_terms.forEach(function (term) {
+                    var card = el('div', 'materi-term');
+                    card.appendChild(el('strong', 'materi-term__name', term.term || ''));
+                    card.appendChild(el('span', 'materi-term__def', term.definition || ''));
+                    grid.appendChild(card);
+                });
+                kt.appendChild(grid);
+                body.appendChild(kt);
+            }
+
+            if (Array.isArray(data.activities) && data.activities.length) {
+                var act = el('section', 'materi-section');
+                act.appendChild(el('h3', 'materi-section__title', 'Aktivitas pembelajaran'));
+                var ol = el('ol', 'materi-steps');
+                data.activities.forEach(function (item) {
+                    var li = el('li', 'materi-step');
+                    var text = (item && typeof item === 'object') ? (item.step || '') : String(item || '');
+                    var mins = (item && typeof item === 'object' && item.minutes != null) ? item.minutes : null;
+                    li.appendChild(el('span', 'materi-step__text', text));
+                    if (mins != null) {
+                        li.appendChild(el('span', 'materi-step__time', mins + ' menit'));
+                    }
+                    ol.appendChild(li);
+                });
+                act.appendChild(ol);
+                body.appendChild(act);
+            }
+
+            if (Array.isArray(data.quiz) && data.quiz.length) {
+                var qz = el('section', 'materi-section');
+                qz.appendChild(el('h3', 'materi-section__title', 'Kuis pemahaman'));
+                data.quiz.forEach(function (item, idx) {
+                    var details = document.createElement('details');
+                    details.className = 'materi-quiz';
+                    var summaryEl = document.createElement('summary');
+                    summaryEl.className = 'materi-quiz__q';
+                    summaryEl.textContent = (idx + 1) + '. ' + (item.question || '');
+                    details.appendChild(summaryEl);
+                    var ans = el('div', 'materi-quiz__a', item.answer || '');
+                    details.appendChild(ans);
+                    qz.appendChild(details);
+                });
+                body.appendChild(qz);
+            }
+
+            if (data.assessment || data.indicator) {
+                var as = el('section', 'materi-section');
+                as.appendChild(el('h3', 'materi-section__title', 'Asesmen & indikator'));
+                if (data.indicator) {
+                    var ip = el('p', null);
+                    var il = el('strong', null, 'Indikator: ');
+                    ip.appendChild(il);
+                    ip.appendChild(document.createTextNode(String(data.indicator)));
+                    as.appendChild(ip);
+                }
+                if (data.assessment) {
+                    as.appendChild(el('p', null, 'Teknik/instrumen: ' + data.assessment));
+                }
+                body.appendChild(as);
+            }
+
+            if (Array.isArray(data.references) && data.references.length) {
+                var ref = el('section', 'materi-section');
+                ref.appendChild(el('h3', 'materi-section__title', 'Referensi'));
+                var olr = el('ol', 'materi-refs');
+                data.references.forEach(function (r) {
+                    olr.appendChild(el('li', null, r));
+                });
+                ref.appendChild(olr);
+                body.appendChild(ref);
+            }
+
+            var note = el('p', 'materi-note', 'Konten ini dibuat otomatis (dummy AI) dari data RPS dan dapat ditinjau serta disesuaikan oleh guru.');
+            body.appendChild(note);
+        }
+
+        function openDrawer(trigger) {
+            lastTrigger = trigger || null;
+            drawer.classList.add('is-open');
+            drawer.setAttribute('aria-hidden', 'false');
+            if (backdrop) {
+                backdrop.hidden = false;
+                backdrop.classList.add('is-visible');
+            }
+            document.body.classList.add('materi-open');
+            if (closeBtn) {
+                closeBtn.focus();
+            }
+        }
+
+        function closeDrawer() {
+            drawer.classList.remove('is-open');
+            drawer.setAttribute('aria-hidden', 'true');
+            if (backdrop) {
+                backdrop.classList.remove('is-visible');
+                backdrop.hidden = true;
+            }
+            document.body.classList.remove('materi-open');
+            if (lastTrigger && typeof lastTrigger.focus === 'function') {
+                lastTrigger.focus();
+            }
+        }
+
+        function loadMateri(week, trigger) {
+            var reqId = ++currentRequest;
+            currentData = null;
+            setText(titleEl, 'Materi pertemuan ' + week);
+            setText(metaEl, 'Memuat informasi pertemuan...');
+            if (copyBtn) copyBtn.disabled = true;
+            if (downloadBtn) downloadBtn.disabled = true;
+            showSkeleton();
+            openDrawer(trigger);
+
+            fetch(baseUrl + '/' + encodeURIComponent(week), {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin'
+            }).then(function (res) {
+                if (reqId !== currentRequest) return null;
+                if (res.status === 401) {
+                    window.location.href = '<?= site_url('login') ?>';
+                    return null;
+                }
+                if (!res.ok) {
+                    return res.json().catch(function () { return {}; }).then(function (err) {
+                        throw new Error(err && err.error ? err.error : 'Gagal memuat materi (HTTP ' + res.status + ').');
+                    });
+                }
+                return res.json();
+            }).then(function (data) {
+                if (!data || reqId !== currentRequest) return;
+                currentData = data;
+                setText(titleEl, data.topic || ('Pertemuan ' + week));
+                var metaParts = ['Pertemuan ' + (data.week || week)];
+                if (data.method) metaParts.push(data.method);
+                if (data.estimated_minutes) metaParts.push(data.estimated_minutes + ' menit');
+                metaParts.push('Dummy AI');
+                setText(metaEl, metaParts.join(' · '));
+                renderData(data);
+                if (copyBtn) copyBtn.disabled = false;
+                if (downloadBtn) downloadBtn.disabled = false;
+            }).catch(function (err) {
+                if (reqId !== currentRequest) return;
+                setText(metaEl, 'Pertemuan ' + week);
+                renderError(err && err.message ? err.message : 'Terjadi kesalahan saat memuat materi.');
+            });
+        }
+
+        function toPlainText(data) {
+            if (!data) return '';
+            var lines = [];
+            var push = function (s) { if (s != null && s !== '') lines.push(String(s)); };
+            push((data.topic || 'Materi Pembelajaran') + ' (Pertemuan ' + (data.week || '-') + ')');
+            var meta = [];
+            if (data.method) meta.push('Metode: ' + data.method);
+            if (data.estimated_minutes) meta.push('Estimasi: ' + data.estimated_minutes + ' menit');
+            if (meta.length) push(meta.join(' | '));
+            push('');
+            if (data.summary) { push('RINGKASAN'); push(data.summary); push(''); }
+            if (Array.isArray(data.objectives) && data.objectives.length) {
+                push('TUJUAN SESI');
+                data.objectives.forEach(function (o, i) { push((i + 1) + '. ' + o); });
+                push('');
+            }
+            if (Array.isArray(data.sections) && data.sections.length) {
+                push('MATERI INTI');
+                data.sections.forEach(function (sec) {
+                    if (sec.heading) push('- ' + sec.heading);
+                    if (Array.isArray(sec.paragraphs)) sec.paragraphs.forEach(push);
+                    if (Array.isArray(sec.points)) sec.points.forEach(function (pt) { push('  • ' + pt); });
+                    push('');
+                });
+            }
+            if (Array.isArray(data.key_terms) && data.key_terms.length) {
+                push('ISTILAH KUNCI');
+                data.key_terms.forEach(function (t) { push('- ' + (t.term || '') + ': ' + (t.definition || '')); });
+                push('');
+            }
+            if (Array.isArray(data.activities) && data.activities.length) {
+                push('AKTIVITAS PEMBELAJARAN');
+                data.activities.forEach(function (a, i) {
+                    var text = (a && typeof a === 'object') ? (a.step || '') : String(a || '');
+                    var mins = (a && typeof a === 'object' && a.minutes != null) ? ' (' + a.minutes + ' menit)' : '';
+                    push((i + 1) + '. ' + text + mins);
+                });
+                push('');
+            }
+            if (Array.isArray(data.quiz) && data.quiz.length) {
+                push('KUIS PEMAHAMAN');
+                data.quiz.forEach(function (q, i) {
+                    push((i + 1) + '. ' + (q.question || ''));
+                    push('   Jawaban: ' + (q.answer || ''));
+                });
+                push('');
+            }
+            if (data.assessment) { push('ASESMEN: ' + data.assessment); }
+            if (data.indicator) { push('INDIKATOR: ' + data.indicator); }
+            if (Array.isArray(data.references) && data.references.length) {
+                push('');
+                push('REFERENSI');
+                data.references.forEach(function (r, i) { push((i + 1) + '. ' + r); });
+            }
+            push('');
+            push('[Konten dummy AI – dibuat dari data RPS]');
+            return lines.join('\n');
+        }
+
+        document.querySelectorAll('[data-materi-week]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var week = btn.getAttribute('data-materi-week');
+                if (week) {
+                    loadMateri(week, btn);
+                }
+            });
+        });
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeDrawer);
+        }
+        if (backdrop) {
+            backdrop.addEventListener('click', closeDrawer);
+        }
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && drawer.classList.contains('is-open')) {
+                closeDrawer();
+            }
+        });
+
+        if (copyBtn) {
+            copyBtn.addEventListener('click', function () {
+                if (!currentData) return;
+                var text = toPlainText(currentData);
+                var done = function (ok) {
+                    var original = copyBtn.getAttribute('data-label') || copyBtn.textContent;
+                    if (!copyBtn.getAttribute('data-label')) copyBtn.setAttribute('data-label', original);
+                    copyBtn.textContent = ok ? 'Tersalin' : 'Gagal menyalin';
+                    setTimeout(function () { copyBtn.textContent = copyBtn.getAttribute('data-label') || 'Salin materi'; }, 1600);
+                };
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+                } else {
+                    var ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.setAttribute('readonly', '');
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    try { done(document.execCommand('copy')); } catch (err) { done(false); }
+                    document.body.removeChild(ta);
+                }
+            });
+        }
+
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', function () {
+                if (!currentData) return;
+                var text = toPlainText(currentData);
+                var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                var week = currentData.week || 'materi';
+                a.href = url;
+                a.download = 'materi-pertemuan-' + week + '.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+            });
+        }
+    })();
 </script>
 <?= $this->endSection() ?>

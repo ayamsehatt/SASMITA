@@ -7,14 +7,14 @@ use CodeIgniter\Database\Seeder;
 /**
  * Data contoh untuk modul analitik kelas.
  *
- * Seeder ini sengaja dijalankan sekali: bila tabel students sudah berisi
+ * Seeder ini sengaja dijalankan sekali: bila tabel siswa sudah berisi
  * data, proses dihentikan agar input guru tidak ditimpa.
  */
 class KelasSeeder extends Seeder
 {
     public function run(): void
     {
-        if ($this->db->table('students')->countAll() > 0) {
+        if ($this->db->table('siswa')->countAll() > 0) {
             return;
         }
 
@@ -38,11 +38,11 @@ class KelasSeeder extends Seeder
             ];
         }
 
-        $this->db->table('students')->insertBatch($students);
+        $this->db->table('siswa')->insertBatch($students);
 
         // Ambil id siswa sesuai urutan insert agar data kehadiran dan nilai
         // bisa dipetakan dengan benar.
-        $rows   = $this->db->table('students')->orderBy('id', 'ASC')->get()->getResultArray();
+        $rows   = $this->db->table('siswa')->orderBy('id', 'ASC')->get()->getResultArray();
         $ids    = array_column($rows, 'id');
         $dates  = $this->recentWeekdays(3);
         $status = [
@@ -65,7 +65,7 @@ class KelasSeeder extends Seeder
             }
         }
 
-        $this->db->table('attendance')->insertBatch($attendance);
+        $this->db->table('kehadiran')->insertBatch($attendance);
 
         $assessments = [
             ['title' => 'Ulangan Harian Bab 1', 'type' => 'formatif', 'assessment_date' => $dates[0]],
@@ -75,7 +75,7 @@ class KelasSeeder extends Seeder
         $assessmentIds = [];
 
         foreach ($assessments as $assessment) {
-            $this->db->table('assessments')->insert([
+            $this->db->table('asesmen')->insert([
                 'title'           => $assessment['title'],
                 'type'            => $assessment['type'],
                 'assessment_date' => $assessment['assessment_date'],
@@ -109,7 +109,7 @@ class KelasSeeder extends Seeder
             }
         }
 
-        $this->db->table('scores')->insertBatch($scores);
+        $this->db->table('nilai')->insertBatch($scores);
     }
 
     /**

@@ -2,9 +2,11 @@
 
 namespace App\Controllers;
 
+use App\Libraries\MateriGenerator;
 use App\Libraries\RpsGenerator;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\RedirectResponse;
+use CodeIgniter\HTTP\ResponseInterface;
 
 class Rps extends BaseController
 {
@@ -204,6 +206,46 @@ class Rps extends BaseController
         }
 
         return $this->response->download($path, $item['source']['name'] ?? null);
+    }
+
+    /**
+     * Konten materi dummy (bergaya AI) untuk satu pertemuan.
+     */
+    public function material(string $id, string $week): ResponseInterface
+    {
+        if (! session()->get('isLoggedIn')) {
+            return $this->response
+                ->setStatusCode(401)
+                ->setJSON(['error' => 'Silakan masuk terlebih dahulu.']);
+        }
+
+        $item = $this->find($id);
+
+        if ($item === null) {
+            return $this->response
+                ->setStatusCode(404)
+                ->setJSON(['error' => 'RPS tidak ditemukan.']);
+        }
+
+        $weekNum = (int) $week;
+        $meeting = null;
+
+        foreach (($item['meetings'] ?? []) as $row) {
+            if ((int) ($row['week'] ?? 0) === $weekNum) {
+                $meeting = $row;
+                break;
+            }
+        }
+
+        if ($meeting === null) {
+            return $this->response
+                ->setStatusCode(404)
+                ->setJSON(['error' => 'Pertemuan tidak ditemukan.']);
+        }
+
+        $generator = new MateriGenerator();
+
+        return $this->response->setJSON($generator->generate($item, $meeting));
     }
 
     /**
