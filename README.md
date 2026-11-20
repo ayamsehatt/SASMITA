@@ -1,69 +1,113 @@
-# CodeIgniter 4 Application Starter
+# SASMITA — Sistem Asesmen, Pembelajaran, dan Analitik Kelas
 
-## What is CodeIgniter?
+**SASMITA** adalah aplikasi manajemen pembelajaran dan analitik kelas berbasis web yang dibangun menggunakan framework **CodeIgniter 4**. Aplikasi ini dirancang untuk membantu guru/pengajar dalam mengelola Perencanaan Pembelajaran (RPS), mencatat kehadiran serta nilai siswa, membuat dan mengekspor lembar asesmen ke format PDF, serta mengelola profil pengajar.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+---
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+## 🚀 Fitur Utama
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+- 🔐 **Autentikasi & Dasbor**: Sistem masuk (login) terproteksi dan halaman dasbor ringkasan statistik kelas.
+- 📚 **Manajemen RPS (Perencanaan Pembelajaran)**: Pengelolaan rencana pembelajaran, bab/materi, dan unduh sumber belajar.
+- 📊 **Analitik Kelas**:
+  - **Manajemen Siswa**: Tambah dan hapus data siswa per kelas.
+  - **Kehadiran (Absensi)**: Input dan rekap kehadiran harian (Hadir, Sakit, Izin, Alfa).
+  - **Penilaian**: Pencatatan dan rekap nilai siswa berdasarkan jenis asesmen (Tugas, Formatif, Sumatif).
+- 📝 **Pembuat Asesmen & Cetak PDF**: Pembuatan draft lembar soal/asesmen dan fitur cetak/ekspor langsung ke format PDF (*Dompdf*).
+- ⚙️ **Pengaturan Profil**: Manajemen profil pengajar yang tersimpan secara dinamis di database.
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+---
 
-## Installation & updates
+## 🗄️ Struktur Database
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+Database aplikasi (`db_sasmita`) terdiri dari tabel-tabel utama berikut:
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+| Tabel | Keterangan | Relasi |
+| :--- | :--- | :--- |
+| `siswa` | Menyimpan data identitas siswa (`nis`, `name`, `class_name`). | Berelasi ke `kehadiran` dan `nilai`. |
+| `kehadiran` | Menyimpan rekap presensi harian siswa (`student_id`, `attendance_date`, `status`). | Foreign Key `student_id` $\rightarrow$ `siswa.id`. |
+| `asesmen` | Menyimpan data judul dan tipe asesmen (`title`, `type`, `assessment_date`). | Berelasi ke `nilai`. |
+| `nilai` | Menyimpan skor siswa per asesmen (`assessment_id`, `student_id`, `score`). | Foreign Key `assessment_id` $\rightarrow$ `asesmen.id`, `student_id` $\rightarrow$ `siswa.id`. |
+| `pengaturan` | Menyimpan konfigurasi global dan profil guru (*Key-Value Store*). | Tabel independen (tanpa relasi). |
+| `migrations` | Catatan riwayat versi migrasi database bawaan CodeIgniter 4. | Tabel internal framework (tanpa relasi). |
 
-## Setup
+---
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+## 💻 Kebutuhan Sistem
 
-## Important Change with index.php
+- **PHP**: versi 8.2 atau lebih baru
+  - Ekstensi PHP yang wajib aktif: `intl`, `mbstring`, `json`, `mysqlnd`, `curl`
+- **Composer**: versi 2.x
+- **Database**: MySQL 5.7+ atau MariaDB 10.3+
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+---
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+## ⚙️ Panduan Instalasi (Lokal)
 
-**Please** read the user guide for a better explanation of how CI4 works!
+### 1. Clone / Unduh Repository
+```bash
+git clone <repository-url>
+cd SASMITA
+```
 
-## Repository Management
+### 2. Install Dependensi PHP
+```bash
+composer install
+```
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+### 3. Konfigurasi Environment (`.env`)
+Salin file `env` menjadi `.env`:
+```bash
+cp env .env
+```
+Buka file `.env` dan sesuaikan pengaturan database Anda:
+```ini
+CI_ENVIRONMENT = development
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+app.baseURL = 'http://localhost:8080/'
 
-## Server Requirements
+database.default.hostname = 127.0.0.1
+database.default.database = db_sasmita
+database.default.username = root
+database.default.password = 
+database.default.DBDriver = MySQLi
+database.default.port = 3306
+```
 
-PHP version 8.2 or higher is required, with the following extensions installed:
+### 4. Persiapan Database & Migrasi
+Buat database bernama `db_sasmita` di MySQL / phpMyAdmin Anda, kemudian jalankan perintah migrasi dan seeder:
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+```bash
+# Jalankan migrasi tabel
+php spark migrate
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - The end of life date for PHP 8.1 was December 31, 2025.
-> - If you are still using below PHP 8.2, you should upgrade immediately.
-> - The end of life date for PHP 8.2 will be December 31, 2026.
+# (Opsional) Jalankan seeder data awal
+php spark db:seed KelasSeeder
+```
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+### 5. Jalankan Server Lokal
+```bash
+php spark serve
+```
+Buka peramban (browser) Anda dan akses: `http://localhost:8080`
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+---
+
+## 📦 Panduan Deployment (Production)
+
+Saat meng-deploy ke server *production* (Shared Hosting / VPS):
+1. **Optimasi Composer**:
+   ```bash
+   composer install --no-dev --optimize-autoloader
+   ```
+2. **Ubah Mode Environment**: Set `CI_ENVIRONMENT = production` di file `.env` server.
+3. **Document Root**: Arahkan root web server (Apache/Nginx/cPanel) langsung ke folder **`public/`** demi keamanan file aplikasi.
+4. **Izin Folder**: Pastikan folder `writable/` memiliki izin akses *write* (`775` / `777`).
+
+---
+
+## 🛠️ Teknologi & Library
+
+- **Framework**: [CodeIgniter 4.7](https://codeigniter.com)
+- **PDF Generator**: [Dompdf 3.1](https://github.com/dompdf/dompdf)
+- **Language**: PHP 8.2+ & JavaScript
+- **Database**: MySQL / MariaDB
